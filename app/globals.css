@@ -1,26 +1,177 @@
+/*
+  globals.css — Tailwind v4 compatible
+  
+  ============================================================
+  TAILWIND V3 vs V4 — THE KEY DIFFERENCES
+  ============================================================
+  
+  When you ran create-next-app, it installed Tailwind v4.
+  Most tutorials (and AI models) teach v3. Here's what changed:
+  
+  V3 (old):                         V4 (new, what you have):
+  ─────────────────────────────────────────────────────────────
+  @tailwind base;                   @import "tailwindcss";
+  @tailwind components;             (single line replaces all three)
+  @tailwind utilities;
+  
+  tailwind.config.ts (required)     tailwind.config.ts (optional)
+                                    Theme defined in CSS with @theme
+  
+  @layer utilities { ... }          @utility { ... }
+  @layer components { ... }         @layer components still works
+                                    but utilities have their own block
+  
+  The good news: v4 is simpler overall. Your theme lives here in CSS
+  instead of a separate JS config file.
+  ============================================================
+*/
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   @THEME — Custom design tokens (replaces tailwind.config.ts)
+   
+   In Tailwind v4, you define custom colors, fonts, animations
+   etc. directly in CSS using @theme. Each CSS variable you
+   define here automatically becomes a Tailwind utility class.
+   
+   --color-pokemon-red: #FF1111  →  bg-pokemon-red, text-pokemon-red
+   --color-type-fire: #F08030    →  bg-type-fire, text-type-fire
+   
+   This replaces the `extend: { colors: { ... } }` section
+   in tailwind.config.ts from v3.
+   ============================================================ */
+@theme {
+  /* ── Pokemon brand colors ── */
+  --color-pokemon-red: #FF1111;
+  --color-pokemon-darkred: #CC0000;
+  --color-pokemon-blue: #3B4CCA;
+  --color-pokemon-yellow: #FFDE00;
+  --color-pokemon-gold: #B3A125;
+  --color-pokemon-black: #212121;
+  --color-pokemon-white: #F8F8F8;
+  --color-pokemon-gray: #6B6B6B;
+  --color-pokemon-lightgray: #E8E8E8;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* ── Type colors ── */
+  --color-type-normal: #A8A878;
+  --color-type-fire: #F08030;
+  --color-type-water: #6890F0;
+  --color-type-electric: #F8D030;
+  --color-type-grass: #78C850;
+  --color-type-ice: #98D8D8;
+  --color-type-fighting: #C03028;
+  --color-type-poison: #A040A0;
+  --color-type-ground: #E0C068;
+  --color-type-flying: #A890F0;
+  --color-type-psychic: #F85888;
+  --color-type-bug: #A8B820;
+  --color-type-rock: #B8A038;
+  --color-type-ghost: #705898;
+  --color-type-dragon: #7038F8;
+  --color-type-dark: #705848;
+  --color-type-steel: #B8B8D0;
+  --color-type-fairy: #EE99AC;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* ── Font families ── */
+  --font-size-2xs: 0.625rem;
+
+  /* ── Box shadows ── */
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.18), 0 4px 8px rgba(0,0,0,0.12);
+
+  /* ── Animations ── */
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-spin-slow: spin-slow 3s linear infinite;
+  --animate-shimmer: shimmer 1.5s infinite;
+
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
 }
 
+/* ============================================================
+   CSS CUSTOM PROPERTIES (runtime variables)
+   ============================================================ */
+:root {
+  --nav-height: 64px;
+}
+
+/* ============================================================
+   BASE RESET STYLES
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-pokemon-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+}
+
+h1, h2, h3, h4, h5, h6, p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ============================================================
+   @utility — Custom utility classes (Tailwind v4 syntax)
+   In v3 this was: @layer utilities { .my-class { ... } }
+   ============================================================ */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@utility skeleton {
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================================
+   @layer components — Reusable component patterns
+   ============================================================ */
+@layer components {
+  .card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    padding: 1rem;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: white;
+  }
 }
