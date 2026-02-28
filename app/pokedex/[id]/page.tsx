@@ -62,6 +62,7 @@ import {
   getPokemonWithSpecies,
   getEvolutionChain,
   flattenEvolutionChain,
+  formatEvolutionDetails,
   getEnglishFlavorText,
   getLetsGoMoves,
   capitalize,
@@ -389,15 +390,19 @@ export default async function PokemonDetailPage({
                 );
                 const isCurrentPokemon = evoId === pokemon.id;
 
+                // determine the label shown beneath the arrow
+                const evoLabel =
+                  index > 0 ? formatEvolutionDetails(evolutions[index].details) : "";
+
                 return (
                   <div key={evo.name} className="flex items-center gap-2">
                     {/* Arrow between evolutions */}
                     {index > 0 && (
-                      <div className="flex flex-col items-center text-pokemon-gray px-1">
-                        <span className="text-lg">→</span>
-                        {evolutions[index].minLevel && (
-                          <span className="text-2xs text-pokemon-gray whitespace-nowrap">
-                            Lv. {evolutions[index].minLevel}
+                      <div className="flex flex-col items-center justify-center self-center text-pokemon-gray px-1">
+                        <span className="text-lg leading-none">→</span>
+                        {evoLabel && (
+                          <span className="text-xs text-pokemon-gray text-center max-w-[3.5rem] whitespace-normal break-normal">
+                            {evoLabel}
                           </span>
                         )}
                       </div>
@@ -406,10 +411,10 @@ export default async function PokemonDetailPage({
                     {/* Evolution card */}
                     <Link
                       href={`/pokedex/${evoId}`}
-                      className={`flex flex-col items-center p-3 rounded-xl transition-colors ${
+                      className={`flex flex-col items-center p-3 rounded-xl transition-colors border-2 ${
                         isCurrentPokemon
-                          ? "bg-pokemon-lightgray ring-2 ring-pokemon-red"
-                          : "hover:bg-pokemon-lightgray"
+                          ? "bg-pokemon-lightgray border-pokemon-red"
+                          : "border-transparent hover:bg-pokemon-lightgray"
                       }`}
                     >
                       <Image

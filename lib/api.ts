@@ -78,6 +78,7 @@ import {
   PokemonListResponse,
   PokemonSpecies,
   EvolutionChain,
+  EvolutionDetail,
   PokemonTypeData,
   Move,
   LETS_GO_MAX_POKEMON,
@@ -351,6 +352,44 @@ export async function getEvolutionChain(
 }
 
 /**
+ * Turn a set of evolution details into a human-readable label. We try
+ * to surface the most relevant information, falling back to the trigger
+ * name when nothing more specific is available.
+ *
+ * The PokéAPI returns a rather complex object describing every possible
+ * condition (item, level, happiness, trade, etc.). In our UI we only
+ * need a short phrase such as "Lv. 16", "Thunder Stone" or "Trade".
+ */
+export function formatEvolutionDetails(details: EvolutionDetail[]): string {
+  if (!details || details.length === 0) return "";
+  const d = details[0]; // most chains only have one entry
+
+  const humanize = (name: string) =>
+    capitalize(name.replace(/-/g, " "));
+
+  switch (d.trigger.name) {
+    case "level-up":
+      if (d.min_level) return `Lv. ${d.min_level}`;
+      if (d.min_happiness) return `Happiness ≥ ${d.min_happiness}`;
+      if (d.time_of_day) return capitalize(d.time_of_day);
+      if (d.location) return capitalize(d.location.name);
+      break;
+    case "use-item":
+      if (d.item) return humanize(d.item.name); // full name, e.g. "Thunder Stone"
+      break;
+    case "trade":
+      if (d.held_item)
+        return `Trade holding ${humanize(d.held_item.name)}`;
+      return "Trade";
+    default:
+      return humanize(d.trigger.name);
+  }
+
+  // fallback
+  return humanize(d.trigger.name);
+}
+
+/**
  * Helper: extract a flat array of Pokémon names from an evolution chain.
  *
  * The chain is a recursive linked list structure. This function
@@ -365,18 +404,45 @@ export async function getEvolutionChain(
  * This is a recursive function — it calls itself on each
  * evolves_to entry. Same pattern in RN and web.
  */
+export interface FlatEvolution {
+  name: string;
+  url: string;
+  /**
+   * The first evolution detail's minimum level (if applicable).
+   * This mirrors the previous output for backwards compatibility, but
+   * callers are encouraged to inspect `details` directly for richer
+   * information.
+   */
+  minLevel: number | null;
+  /**
+   * All evolution details provided by the PokéAPI for this link. Most
+   * chains only have one detail entry, but Eevee, for example, can have
+   * multiple entries (one per possible stone).
+   */
+  details: EvolutionDetail[];
+}
+
 export function flattenEvolutionChain(
   chain: EvolutionChain["chain"]
-): Array<{ name: string; url: string; minLevel: number | null }> {
-  const result: Array<{ name: string; url: string; minLevel: number | null }> = [];
+): FlatEvolution[] {
+  const result: FlatEvolution[] = [];
 
   // Recursive helper
   function traverse(link: EvolutionChain["chain"]) {
-    result.push({
-      name: link.species.name,
-      url: link.species.url,
-      minLevel: link.evolution_details[0]?.min_level ?? null,
-    });
+    // Extract ID from the species URL and only include if it's in Let's Go
+    const evoId = parseInt(
+      link.species.url.split("/").filter(Boolean).pop() ?? "0"
+    );
+    
+    if (evoId <= LETS_GO_MAX_POKEMON) {
+      result.push({
+        name: link.species.name,
+        url: link.species.url,
+        minLevel: link.evolution_details[0]?.min_level ?? null,
+        details: link.evolution_details,
+      });
+    }
+    
     // Recurse into each evolution
     link.evolves_to.forEach(traverse);
   }
@@ -384,6 +450,7 @@ export function flattenEvolutionChain(
   traverse(chain);
   return result;
 }
+
 
 /* ============================================================
    TYPE FUNCTIONS
@@ -635,8 +702,8 @@ export function formatWeight(hectograms: number): string {
  * Low stats are red, mid are yellow, high are green.
  */
 export function getStatColor(value: number): string {
-  if (value < 50) return "bg-red-400";
-  if (value < 80) return "bg-yellow-400";
-  if (value < 100) return "bg-green-400";
+  if (value < 25) return "bg-red-400";
+  if (value < 50) return "bg-yellow-400";
+  if (value < 75) return "bg-green-400";
   return "bg-emerald-500";
 }

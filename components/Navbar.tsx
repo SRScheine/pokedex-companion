@@ -206,14 +206,13 @@ export default function Navbar() {
               → Uses our pixel font CSS variable for the logo text
               → Square bracket notation in Tailwind lets you use
                 arbitrary CSS values that aren't in your config
-            
+
             text-pokemon-yellow: our bright yellow brand color
-            text-sm: font-size 0.875rem (14px) — pixel font is very bold
-                     so we keep it small
-            hidden sm:block: hide on tiny screens, show on 640px+
-                     This keeps the mobile nav clean.
+            text-xs: slightly smaller text on mobile so it fits
+            sm:text-sm: restore the regular small size at 640px+
+            block: visible on all screen sizes (was previously hidden on mobile)
           */}
-          <span className="font-[family-name:var(--font-pixel)] text-pokemon-yellow text-sm hidden sm:block">
+          <span className="font-[family-name:var(--font-pixel)] text-pokemon-yellow text-xs sm:text-sm block">
             PokéCompanion
           </span>
         </Link>

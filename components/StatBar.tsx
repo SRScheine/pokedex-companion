@@ -14,14 +14,24 @@ interface StatBarProps {
   stat: PokemonStat;
 }
 
-// Max possible base stat (Blissey's HP is 255 — the highest in Gen 1)
-// We use this to calculate the bar's fill percentage.
-const MAX_STAT = 255;
+// Maximum base stat values for each category in Gen 1 Pokémon (1-151)
+// These are the actual recorded maximums found in the generation:
+// HP: 250 (Chansey), Attack: 134 (Dragonite), Defense: 180 (Cloyster),
+// Sp. Atk: 154 (Mewtwo), Sp. Def: 125 (Articuno), Speed: 150 (Electrode)
+const MAX_STATS: Record<string, number> = {
+  hp: 250,
+  attack: 134,
+  defense: 180,
+  "special-attack": 154,
+  "special-defense": 125,
+  speed: 150,
+};
 
 export default function StatBar({ stat }: StatBarProps) {
   const statName = STAT_NAMES[stat.stat.name] ?? stat.stat.name;
-  const percentage = Math.round((stat.base_stat / MAX_STAT) * 100);
-  const colorClass = getStatColor(stat.base_stat);
+  const maxStat = MAX_STATS[stat.stat.name] ?? 255; // Fallback to 255 for unknown stats
+  const percentage = Math.round((stat.base_stat / maxStat) * 100);
+  const colorClass = getStatColor(percentage);
 
   return (
     <div className="flex items-center gap-3">
@@ -80,7 +90,7 @@ export default function StatBar({ stat }: StatBarProps) {
           /*
             role="progressbar" + aria attributes:
             Screen readers use these to announce the stat value.
-            "HP: 45 out of 255"
+            "HP: 45 out of 250" (Chansey's max)
             In RN: accessibilityRole="progressbar", accessibilityValue
             On web: role + aria-valuenow/min/max
             Same concept, slightly different attribute names.
@@ -88,7 +98,7 @@ export default function StatBar({ stat }: StatBarProps) {
           role="progressbar"
           aria-valuenow={stat.base_stat}
           aria-valuemin={0}
-          aria-valuemax={MAX_STAT}
+          aria-valuemax={maxStat}
           aria-label={`${statName}: ${stat.base_stat}`}
         />
       </div>
