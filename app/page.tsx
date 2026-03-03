@@ -67,7 +67,7 @@ import {Pokemon} from '@/types/pokemon';
 import TypeBadge from '@/components/TypeBadge';
 
 export const metadata: Metadata = {
-  title: 'Home',
+  title: 'Home | Pokémon Companion',
   description: "Your Pokémon Let's Go Pikachu companion.",
 };
 
