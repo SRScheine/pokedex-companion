@@ -37,7 +37,7 @@
   The main difference: className string vs StyleSheet object.
 */
 
-import { PokemonTypeName } from "@/types/pokemon";
+import {PokemonTypeName} from '@/types/pokemon';
 
 // ============================================================
 // TYPE → COLOR MAPPING
@@ -52,60 +52,56 @@ import { PokemonTypeName } from "@/types/pokemon";
 // - TypeScript will error if we forget a type or add a typo
 // ============================================================
 const TYPE_COLORS: Record<PokemonTypeName, string> = {
-  normal:   "bg-type-normal",
-  fire:     "bg-type-fire",
-  water:    "bg-type-water",
-  electric: "bg-type-electric",
-  grass:    "bg-type-grass",
-  ice:      "bg-type-ice",
-  fighting: "bg-type-fighting",
-  poison:   "bg-type-poison",
-  ground:   "bg-type-ground",
-  flying:   "bg-type-flying",
-  psychic:  "bg-type-psychic",
-  bug:      "bg-type-bug",
-  rock:     "bg-type-rock",
-  ghost:    "bg-type-ghost",
-  dragon:   "bg-type-dragon",
-  dark:     "bg-type-dark",
-  steel:    "bg-type-steel",
-  fairy:    "bg-type-fairy",
+  normal: 'bg-type-normal',
+  fire: 'bg-type-fire',
+  water: 'bg-type-water',
+  electric: 'bg-type-electric',
+  grass: 'bg-type-grass',
+  ice: 'bg-type-ice',
+  fighting: 'bg-type-fighting',
+  poison: 'bg-type-poison',
+  ground: 'bg-type-ground',
+  flying: 'bg-type-flying',
+  psychic: 'bg-type-psychic',
+  bug: 'bg-type-bug',
+  rock: 'bg-type-rock',
+  ghost: 'bg-type-ghost',
+  dragon: 'bg-type-dragon',
+  dark: 'bg-type-dark',
+  steel: 'bg-type-steel',
+  fairy: 'bg-type-fairy',
 };
 
 // Text colors — most types use white text, but light-background
 // types need dark text for contrast (accessibility).
 const TYPE_TEXT_COLORS: Partial<Record<PokemonTypeName, string>> = {
-  electric: "text-pokemon-black",  // Yellow background → dark text
-  ground:   "text-pokemon-black",  // Light tan → dark text
-  ice:      "text-pokemon-black",  // Light blue → dark text
-  normal:   "text-pokemon-black",  // Gray → dark text
+  electric: 'text-pokemon-black', // Yellow background → dark text
+  ground: 'text-pokemon-black', // Light tan → dark text
+  ice: 'text-pokemon-black', // Light blue → dark text
+  normal: 'text-pokemon-black', // Gray → dark text
 };
 
 // ============================================================
 // PROPS INTERFACE
 // ============================================================
 interface TypeBadgeProps {
-  typeName: string;           // The type name from PokéAPI ("fire", "water", etc.)
-  size?: "sm" | "md" | "lg"; // Controls badge size
-  className?: string;         // Allow parent to add extra classes
-                              // In RN: style prop for style overrides
+  typeName: string; // The type name from PokéAPI ("fire", "water", etc.)
+  size?: 'sm' | 'md' | 'lg'; // Controls badge size
+  className?: string; // Allow parent to add extra classes
+  // In RN: style prop for style overrides
 }
 
 // Size variants — maps size prop to Tailwind classes
 const SIZE_CLASSES = {
-  sm: "text-2xs px-2 py-0.5",   // 10px text, tight padding
-  md: "text-xs px-3 py-1",      // 12px text, standard padding
-  lg: "text-sm px-4 py-1.5",    // 14px text, generous padding
+  sm: 'text-2xs px-2 py-0.5', // 10px text, tight padding
+  md: 'text-xs px-3 py-1', // 12px text, standard padding
+  lg: 'text-sm px-4 py-1.5', // 14px text, generous padding
 };
 
 // ============================================================
 // COMPONENT
 // ============================================================
-export default function TypeBadge({
-  typeName,
-  size = "md",
-  className = "",
-}: TypeBadgeProps) {
+export default function TypeBadge({typeName, size = 'md', className = ''}: TypeBadgeProps) {
   /*
     Type safety: cast to PokemonTypeName for the color lookup.
     If the API sends an unknown type, we fall back to a gray color.
@@ -115,8 +111,8 @@ export default function TypeBadge({
     just in case the API surprises us.
   */
   const typeKey = typeName as PokemonTypeName;
-  const bgColor = TYPE_COLORS[typeKey] ?? "bg-pokemon-gray";
-  const textColor = TYPE_TEXT_COLORS[typeKey] ?? "text-white";
+  const bgColor = TYPE_COLORS[typeKey] ?? 'bg-pokemon-gray';
+  const textColor = TYPE_TEXT_COLORS[typeKey] ?? 'text-white';
   const sizeClass = SIZE_CLASSES[size];
 
   return (
@@ -138,10 +134,6 @@ export default function TypeBadge({
         letter-spacing: 0.05em
         color: white (overridden by textColor below)
     */
-    <span
-      className={`badge ${bgColor} ${textColor} ${sizeClass} ${className}`}
-    >
-      {typeName}
-    </span>
+    <span className={`badge ${bgColor} ${textColor} ${sizeClass} ${className}`}>{typeName}</span>
   );
 }

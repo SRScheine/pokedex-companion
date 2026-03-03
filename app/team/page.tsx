@@ -23,12 +23,12 @@
     Data from the browser (localStorage, etc.) → read in Client Component
 */
 
-import { Metadata } from "next";
-import { Suspense } from "react";
-import TeamBuilder from "@/components/Teambuilder";
+import {Metadata} from 'next';
+import {Suspense} from 'react';
+import TeamBuilder from '@/components/Teambuilder';
 
 export const metadata: Metadata = {
-  title: "My Team",
+  title: 'My Team',
   description: "Build and save your Pokémon Let's Go team.",
 };
 
@@ -37,12 +37,12 @@ export const metadata: Metadata = {
 function TeamSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+        {Array.from({length: 6}).map((_, i) => (
           <div key={i} className="skeleton h-32 rounded-2xl" />
         ))}
       </div>
-      <div className="skeleton h-24 rounded-2xl mb-8" />
+      <div className="skeleton mb-8 h-24 rounded-2xl" />
       <div className="skeleton h-48 rounded-2xl" />
     </div>
   );
@@ -56,16 +56,12 @@ export default function TeamPage() {
     server-side work to do. async is only needed for await.
   */
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
-
+    <div className="animate-fade-in mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-pixel)] text-pokemon-black text-xl md:text-2xl mb-2">
-          My Team
-        </h1>
+        <h1 className="text-pokemon-black mb-2 font-[family-name:var(--font-pixel)] text-xl md:text-2xl">My Team</h1>
         <p className="text-pokemon-gray text-sm">
-          Build your party for Let&apos;s Go Pikachu. Your team is saved
-          in your browser automatically.
+          Build your party for Let&apos;s Go Pikachu. Your team is saved in your browser automatically.
         </p>
       </div>
 
@@ -82,7 +78,6 @@ export default function TeamPage() {
       <Suspense fallback={<TeamSkeleton />}>
         <TeamBuilder />
       </Suspense>
-
     </div>
   );
 }

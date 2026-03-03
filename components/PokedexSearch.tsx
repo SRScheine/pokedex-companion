@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /*
   components/PokedexSearch.tsx
@@ -63,10 +63,10 @@
   React state just tracks the input field's current value.
 */
 
-import { useState } from "react";
+import {useState} from 'react';
 // useRouter: programmatic navigation — like navigation.navigate() in RN
 // but for updating the URL.
-import { useRouter, useSearchParams } from "next/navigation";
+import {useRouter, useSearchParams} from 'next/navigation';
 
 export default function PokedexSearch() {
   const router = useRouter();
@@ -88,9 +88,7 @@ export default function PokedexSearch() {
 
     This syncs the UI with the URL on first render.
   */
-  const [query, setQuery] = useState(
-    searchParams.get("search") ?? ""
-  );
+  const [query, setQuery] = useState(searchParams.get('search') ?? '');
 
   function handleSearch(e: React.FormEvent) {
     /*
@@ -115,13 +113,13 @@ export default function PokedexSearch() {
     const params = new URLSearchParams(searchParams.toString());
 
     if (query.trim()) {
-      params.set("search", query.trim());
+      params.set('search', query.trim());
     } else {
-      params.delete("search");
+      params.delete('search');
     }
 
     // Always reset to page 1 when searching
-    params.delete("page");
+    params.delete('page');
 
     /*
       router.push(): navigates to a new URL.
@@ -137,8 +135,8 @@ export default function PokedexSearch() {
   }
 
   function handleClear() {
-    setQuery("");
-    router.push("/pokedex");
+    setQuery('');
+    router.push('/pokedex');
   }
 
   return (
@@ -155,7 +153,7 @@ export default function PokedexSearch() {
       <div className="relative">
         {/* Search icon — decorative, positioned absolutely inside the input */}
         <span
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-pokemon-gray pointer-events-none"
+          className="text-pokemon-gray pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
           aria-hidden="true"
         >
           🔍
@@ -190,7 +188,7 @@ export default function PokedexSearch() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search Pokémon..."
-          className="w-full pl-10 pr-10 py-2.5 rounded-full border border-pokemon-lightgray bg-white focus:outline-none focus:ring-2 focus:ring-pokemon-red text-pokemon-black placeholder:text-pokemon-gray text-sm"
+          className="border-pokemon-lightgray focus:ring-pokemon-red text-pokemon-black placeholder:text-pokemon-gray w-full rounded-full border bg-white py-2.5 pr-10 pl-10 text-sm focus:ring-2 focus:outline-none"
           /*
             aria-label: screen reader label for the input.
             In RN: accessibilityLabel
@@ -205,7 +203,7 @@ export default function PokedexSearch() {
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-pokemon-gray hover:text-pokemon-black transition-colors"
+            className="text-pokemon-gray hover:text-pokemon-black absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
             aria-label="Clear search"
           >
             ✕

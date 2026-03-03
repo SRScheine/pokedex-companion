@@ -45,16 +45,16 @@
   and fetches exactly the right Pokémon. No client-side filtering.
 */
 
-import { Metadata } from "next";
-import { Suspense } from "react";
-import { getPokemonListWithDetails, searchPokemon } from "@/lib/api";
-import { LETS_GO_MAX_POKEMON } from "@/types/pokemon";
-import PokemonCard from "@/components/PokemonCard";
-import PokedexSearch from "@/components/PokedexSearch";
-import Link from "next/link";
+import {Metadata} from 'next';
+import {Suspense} from 'react';
+import {getPokemonListWithDetails, searchPokemon} from '@/lib/api';
+import {LETS_GO_MAX_POKEMON} from '@/types/pokemon';
+import PokemonCard from '@/components/PokemonCard';
+import PokedexSearch from '@/components/PokedexSearch';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Pokédex",
+  title: 'Pokédex',
   description: "Browse all 151 original Pokémon available in Let's Go Pikachu.",
 };
 
@@ -75,16 +75,16 @@ interface PokedexPageProps {
   }>;
 }
 
-export default async function PokedexPage({ searchParams }: PokedexPageProps) {
+export default async function PokedexPage({searchParams}: PokedexPageProps) {
   // Await searchParams (required in Next.js 15+)
   const params = await searchParams;
-  const searchQuery = params.search ?? "";
+  const searchQuery = params.search ?? '';
   /*
     Parse page number from URL.
     URL params are always strings, so we parseInt.
     We clamp to minimum 1 in case someone passes ?page=0 or ?page=-1.
   */
-  const currentPage = Math.max(1, parseInt(params.page ?? "1"));
+  const currentPage = Math.max(1, parseInt(params.page ?? '1'));
   const offset = (currentPage - 1) * PAGE_SIZE;
 
   /*
@@ -109,7 +109,7 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
     pokemon = await Promise.all(
       searchResults.map(async (result) => {
         const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${result.id}`, {
-          cache: "force-cache",
+          cache: 'force-cache',
         });
         return res.json();
       })
@@ -124,19 +124,15 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
-
+    <div className="animate-fade-in mx-auto max-w-6xl px-4 py-8">
       {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="font-[family-name:var(--font-pixel)] text-pokemon-black text-xl md:text-2xl">
-            Pokédex
-          </h1>
-          <p className="text-pokemon-gray text-sm mt-1">
+          <h1 className="text-pokemon-black font-[family-name:var(--font-pixel)] text-xl md:text-2xl">Pokédex</h1>
+          <p className="text-pokemon-gray mt-1 text-sm">
             {isSearching
-              ? `${totalCount} result${totalCount !== 1 ? "s" : ""} for "${searchQuery}"`
-              : `Gen 1 — ${LETS_GO_MAX_POKEMON} Pokémon`
-            }
+              ? `${totalCount} result${totalCount !== 1 ? 's' : ''} for "${searchQuery}"`
+              : `Gen 1 — ${LETS_GO_MAX_POKEMON} Pokémon`}
           </p>
         </div>
 
@@ -157,7 +153,7 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
           to server-rendered HTML. Web-only concept — in RN all
           components are "live" immediately.
         */}
-        <Suspense fallback={<div className="h-10 w-full md:w-80 skeleton rounded-full" />}>
+        <Suspense fallback={<div className="skeleton h-10 w-full rounded-full md:w-80" />}>
           <PokedexSearch />
         </Suspense>
       </div>
@@ -165,17 +161,15 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
       {/* ── POKEMON GRID ── */}
       {pokemon.length === 0 ? (
         // Empty state
-        <div className="text-center py-20">
-          <p className="text-5xl mb-4">😕</p>
-          <p className="text-pokemon-black font-semibold text-lg mb-2">
-            No Pokémon found
-          </p>
-          <p className="text-pokemon-gray text-sm mb-6">
+        <div className="py-20 text-center">
+          <p className="mb-4 text-5xl">😕</p>
+          <p className="text-pokemon-black mb-2 text-lg font-semibold">No Pokémon found</p>
+          <p className="text-pokemon-gray mb-6 text-sm">
             No results for &quot;{searchQuery}&quot;. Try a different name.
           </p>
           <Link
             href="/pokedex"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-pokemon-red text-white rounded-full font-medium hover:bg-pokemon-darkred transition-colors text-sm"
+            className="bg-pokemon-red hover:bg-pokemon-darkred inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-white transition-colors"
           >
             Clear search
           </Link>
@@ -192,7 +186,7 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
           This gives us a dense, app-like grid on desktop
           while staying usable on small phone screens.
         */
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-10">
+        <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {pokemon.map((p: any) => (
             <PokemonCard key={p.id} pokemon={p} />
           ))}
@@ -215,13 +209,12 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
         URL-based pagination is a web-specific pattern.
       */}
       {!isSearching && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-
+        <div className="mt-4 flex items-center justify-center gap-2">
           {/* Previous button */}
           {currentPage > 1 ? (
             <Link
               href={`/pokedex?page=${currentPage - 1}`}
-              className="flex items-center gap-1 px-4 py-2 rounded-full bg-white border border-pokemon-lightgray text-pokemon-black text-sm font-medium hover:bg-pokemon-lightgray transition-colors"
+              className="border-pokemon-lightgray text-pokemon-black hover:bg-pokemon-lightgray flex items-center gap-1 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-colors"
             >
               ← Prev
             </Link>
@@ -234,7 +227,7 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
               aria-disabled for accessibility.
             */
             <div
-              className="flex items-center gap-1 px-4 py-2 rounded-full bg-pokemon-lightgray text-pokemon-gray text-sm font-medium cursor-not-allowed"
+              className="bg-pokemon-lightgray text-pokemon-gray flex cursor-not-allowed items-center gap-1 rounded-full px-4 py-2 text-sm font-medium"
               aria-disabled="true"
             >
               ← Prev
@@ -248,7 +241,7 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
             This is a common pagination UX pattern.
           */}
           <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
+            {Array.from({length: totalPages}, (_, i) => i + 1)
               .filter((page) => {
                 // Always show first and last page
                 if (page === 1 || page === totalPages) return true;
@@ -256,29 +249,29 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
                 if (Math.abs(page - currentPage) <= 1) return true;
                 return false;
               })
-              .reduce((acc: (number | "...")[], page, idx, arr) => {
+              .reduce((acc: (number | '...')[], page, idx, arr) => {
                 // Insert "..." between non-consecutive pages
                 if (idx > 0 && page - (arr[idx - 1] as number) > 1) {
-                  acc.push("...");
+                  acc.push('...');
                 }
                 acc.push(page);
                 return acc;
               }, [])
               .map((item, idx) =>
-                item === "..." ? (
-                  <span key={`ellipsis-${idx}`} className="px-2 text-pokemon-gray text-sm">
+                item === '...' ? (
+                  <span key={`ellipsis-${idx}`} className="text-pokemon-gray px-2 text-sm">
                     ...
                   </span>
                 ) : (
                   <Link
                     key={item}
                     href={`/pokedex?page=${item}`}
-                    className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                       item === currentPage
-                        ? "bg-pokemon-red text-white"          // Active page
-                        : "bg-white border border-pokemon-lightgray text-pokemon-black hover:bg-pokemon-lightgray"
+                        ? 'bg-pokemon-red text-white' // Active page
+                        : 'border-pokemon-lightgray text-pokemon-black hover:bg-pokemon-lightgray border bg-white'
                     }`}
-                    aria-current={item === currentPage ? "page" : undefined}
+                    aria-current={item === currentPage ? 'page' : undefined}
                   >
                     {item}
                   </Link>
@@ -290,13 +283,13 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
           {currentPage < totalPages ? (
             <Link
               href={`/pokedex?page=${currentPage + 1}`}
-              className="flex items-center gap-1 px-4 py-2 rounded-full bg-white border border-pokemon-lightgray text-pokemon-black text-sm font-medium hover:bg-pokemon-lightgray transition-colors"
+              className="border-pokemon-lightgray text-pokemon-black hover:bg-pokemon-lightgray flex items-center gap-1 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-colors"
             >
               Next →
             </Link>
           ) : (
             <div
-              className="flex items-center gap-1 px-4 py-2 rounded-full bg-pokemon-lightgray text-pokemon-gray text-sm font-medium cursor-not-allowed"
+              className="bg-pokemon-lightgray text-pokemon-gray flex cursor-not-allowed items-center gap-1 rounded-full px-4 py-2 text-sm font-medium"
               aria-disabled="true"
             >
               Next →
@@ -307,7 +300,7 @@ export default async function PokedexPage({ searchParams }: PokedexPageProps) {
 
       {/* Page count info */}
       {!isSearching && (
-        <p className="text-center text-pokemon-gray text-xs mt-4">
+        <p className="text-pokemon-gray mt-4 text-center text-xs">
           Page {currentPage} of {totalPages} · {LETS_GO_MAX_POKEMON} Pokémon total
         </p>
       )}

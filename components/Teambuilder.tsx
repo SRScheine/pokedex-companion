@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /*
   components/TeamBuilder.tsx
@@ -63,14 +63,14 @@
   This pattern comes up constantly in Next.js — learn it well.
 */
 
-import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { TeamMember } from "@/types/pokemon";
-import { getSpriteUrl, capitalize, formatPokemonId, searchPokemon } from "@/lib/api";
-import TypeBadge from "@/components/TypeBadge";
+import {useState, useEffect, useCallback} from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import {TeamMember} from '@/types/pokemon';
+import {getSpriteUrl, capitalize, formatPokemonId, searchPokemon} from '@/lib/api';
+import TypeBadge from '@/components/TypeBadge';
 
-const STORAGE_KEY = "pokedex-companion-team";
+const STORAGE_KEY = 'pokedex-companion-team';
 const MAX_TEAM_SIZE = 6;
 
 export default function TeamBuilder() {
@@ -95,13 +95,13 @@ export default function TeamBuilder() {
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{name: string; id: number; url: string}>>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   // Which team slot is being edited (for nicknaming)
   const [editingNickname, setEditingNickname] = useState<number | null>(null);
-  const [nicknameInput, setNicknameInput] = useState("");
+  const [nicknameInput, setNicknameInput] = useState('');
 
   // ============================================================
   // LOAD FROM localStorage ON MOUNT
@@ -121,7 +121,7 @@ export default function TeamBuilder() {
       }
     } catch (err) {
       // localStorage can throw if storage is full or in private mode
-      console.warn("Could not load team from storage:", err);
+      console.warn('Could not load team from storage:', err);
     } finally {
       // Always mark as hydrated, even if load failed
       setIsHydrated(true);
@@ -141,7 +141,7 @@ export default function TeamBuilder() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(team));
     } catch (err) {
-      console.warn("Could not save team to storage:", err);
+      console.warn('Could not save team to storage:', err);
     }
   }, [team, isHydrated]);
 
@@ -164,7 +164,7 @@ export default function TeamBuilder() {
       const results = await searchPokemon(query);
       setSearchResults(results.slice(0, 8)); // Limit to 8 results
     } catch (err) {
-      console.error("Search failed:", err);
+      console.error('Search failed:', err);
     } finally {
       setIsSearching(false);
     }
@@ -180,7 +180,7 @@ export default function TeamBuilder() {
 
     // Fetch full Pokémon data for types and sprite
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`, {
-      cache: "force-cache",
+      cache: 'force-cache',
     });
     const data = await res.json();
 
@@ -198,7 +198,7 @@ export default function TeamBuilder() {
       Same rule in RN and web — this avoids stale closure issues.
     */
     setTeam((prev) => [...prev, newMember]);
-    setSearchQuery("");
+    setSearchQuery('');
     setSearchResults([]);
   }
 
@@ -207,15 +207,9 @@ export default function TeamBuilder() {
   }
 
   function saveNickname(pokemonId: number) {
-    setTeam((prev) =>
-      prev.map((m) =>
-        m.id === pokemonId
-          ? { ...m, nickname: nicknameInput.trim() || undefined }
-          : m
-      )
-    );
+    setTeam((prev) => prev.map((m) => (m.id === pokemonId ? {...m, nickname: nicknameInput.trim() || undefined} : m)));
     setEditingNickname(null);
-    setNicknameInput("");
+    setNicknameInput('');
   }
 
   // ============================================================
@@ -227,8 +221,8 @@ export default function TeamBuilder() {
   if (!isHydrated) {
     return (
       <div className="animate-pulse">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+          {Array.from({length: 6}).map((_, i) => (
             <div key={i} className="skeleton h-32 rounded-2xl" />
           ))}
         </div>
@@ -238,23 +232,19 @@ export default function TeamBuilder() {
 
   return (
     <div>
-
       {/* ── TEAM SLOTS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
         {/*
           Render filled slots for existing team members,
           then empty slots for remaining spaces up to 6.
         */}
-        {Array.from({ length: MAX_TEAM_SIZE }).map((_, index) => {
+        {Array.from({length: MAX_TEAM_SIZE}).map((_, index) => {
           const member = team[index];
 
           if (member) {
             // Filled slot
             return (
-              <div
-                key={member.id}
-                className="card relative flex flex-col items-center text-center group"
-              >
+              <div key={member.id} className="card group relative flex flex-col items-center text-center">
                 {/* Remove button */}
                 {/*
                   Positioned absolutely in the top-right corner.
@@ -268,7 +258,7 @@ export default function TeamBuilder() {
                 */}
                 <button
                   onClick={() => removeFromTeam(member.id)}
-                  className="absolute top-2 right-2 w-6 h-6 bg-pokemon-red text-white rounded-full text-xs flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-pokemon-darkred"
+                  className="bg-pokemon-red hover:bg-pokemon-darkred absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full text-xs text-white opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                   aria-label={`Remove ${member.nickname ?? member.name} from team`}
                 >
                   ✕
@@ -305,11 +295,11 @@ export default function TeamBuilder() {
                           In RN: onSubmitEditing on TextInput.
                           On web: onKeyDown checking e.key.
                         */
-                        if (e.key === "Enter") saveNickname(member.id);
-                        if (e.key === "Escape") setEditingNickname(null);
+                        if (e.key === 'Enter') saveNickname(member.id);
+                        if (e.key === 'Escape') setEditingNickname(null);
                       }}
                       placeholder={capitalize(member.name)}
-                      className="w-full text-xs text-center border-b border-pokemon-red bg-transparent outline-none pb-0.5"
+                      className="border-pokemon-red w-full border-b bg-transparent pb-0.5 text-center text-xs outline-none"
                       autoFocus
                       /*
                         autoFocus: focuses the input when it mounts.
@@ -322,30 +312,24 @@ export default function TeamBuilder() {
                   <button
                     onClick={() => {
                       setEditingNickname(member.id);
-                      setNicknameInput(member.nickname ?? "");
+                      setNicknameInput(member.nickname ?? '');
                     }}
-                    className="text-xs font-medium text-pokemon-black hover:text-pokemon-red transition-colors capitalize"
+                    className="text-pokemon-black hover:text-pokemon-red text-xs font-medium capitalize transition-colors"
                     title="Click to add nickname"
                   >
                     {member.nickname ?? capitalize(member.name)}
                   </button>
                 )}
 
-                {member.nickname && (
-                  <p className="text-2xs text-pokemon-gray capitalize">
-                    {capitalize(member.name)}
-                  </p>
-                )}
+                {member.nickname && <p className="text-2xs text-pokemon-gray capitalize">{capitalize(member.name)}</p>}
 
-                <div className="flex gap-1 flex-wrap justify-center mt-1">
+                <div className="mt-1 flex flex-wrap justify-center gap-1">
                   {member.types.map((type) => (
                     <TypeBadge key={type} typeName={type} size="sm" />
                   ))}
                 </div>
 
-                <p className="text-2xs text-pokemon-gray mt-1">
-                  {formatPokemonId(member.id)}
-                </p>
+                <p className="text-2xs text-pokemon-gray mt-1">{formatPokemonId(member.id)}</p>
               </div>
             );
           }
@@ -354,9 +338,9 @@ export default function TeamBuilder() {
           return (
             <div
               key={`empty-${index}`}
-              className="border-2 border-dashed border-pokemon-lightgray rounded-2xl flex flex-col items-center justify-center h-32 text-pokemon-gray"
+              className="border-pokemon-lightgray text-pokemon-gray flex h-32 flex-col items-center justify-center rounded-2xl border-2 border-dashed"
             >
-              <span className="text-2xl mb-1 opacity-30">+</span>
+              <span className="mb-1 text-2xl opacity-30">+</span>
               <span className="text-xs opacity-50">Empty</span>
             </div>
           );
@@ -365,11 +349,9 @@ export default function TeamBuilder() {
 
       {/* ── TEAM SUMMARY ── */}
       {team.length > 0 && (
-        <div className="card mb-8 bg-pokemon-lightgray/50">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-pokemon-black">
-              Team Summary
-            </h2>
+        <div className="card bg-pokemon-lightgray/50 mb-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-pokemon-black font-semibold">Team Summary</h2>
             <button
               onClick={() => {
                 /*
@@ -379,11 +361,11 @@ export default function TeamBuilder() {
                   On web: window.confirm() is the quick-and-dirty version.
                   For production apps you'd build a custom modal instead.
                 */
-                if (window.confirm("Clear your entire team?")) {
+                if (window.confirm('Clear your entire team?')) {
                   setTeam([]);
                 }
               }}
-              className="text-xs text-pokemon-gray hover:text-pokemon-red transition-colors"
+              className="text-pokemon-gray hover:text-pokemon-red text-xs transition-colors"
             >
               Clear team
             </button>
@@ -394,8 +376,9 @@ export default function TeamBuilder() {
               <TypeBadge key={type} typeName={type} size="sm" />
             ))}
           </div>
-          <p className="text-xs text-pokemon-gray mt-2">
-            {team.length}/{MAX_TEAM_SIZE} Pokémon · {Array.from(new Set(team.flatMap((m) => m.types))).length} types covered
+          <p className="text-pokemon-gray mt-2 text-xs">
+            {team.length}/{MAX_TEAM_SIZE} Pokémon · {Array.from(new Set(team.flatMap((m) => m.types))).length} types
+            covered
           </p>
         </div>
       )}
@@ -403,34 +386,30 @@ export default function TeamBuilder() {
       {/* ── ADD POKÉMON ── */}
       {team.length < MAX_TEAM_SIZE && (
         <div className="card">
-          <h2 className="font-semibold text-pokemon-black mb-4">
-            Add Pokémon
-          </h2>
+          <h2 className="text-pokemon-black mb-4 font-semibold">Add Pokémon</h2>
 
           {/* Search input */}
           <div className="relative mb-4">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-pokemon-gray pointer-events-none">
-              🔍
-            </span>
+            <span className="text-pokemon-gray pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">🔍</span>
             <input
               type="search"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search by name..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-full border border-pokemon-lightgray bg-white focus:outline-none focus:ring-2 focus:ring-pokemon-red text-pokemon-black placeholder:text-pokemon-gray text-sm"
+              className="border-pokemon-lightgray focus:ring-pokemon-red text-pokemon-black placeholder:text-pokemon-gray w-full rounded-full border bg-white py-2.5 pr-4 pl-10 text-sm focus:ring-2 focus:outline-none"
             />
           </div>
 
           {/* Search results */}
           {isSearching && (
-            <div className="flex items-center gap-2 py-4 text-pokemon-gray text-sm">
-              <div className="w-4 h-4 border-2 border-pokemon-red border-t-transparent rounded-full animate-spin" />
+            <div className="text-pokemon-gray flex items-center gap-2 py-4 text-sm">
+              <div className="border-pokemon-red h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
               Searching...
             </div>
           )}
 
           {searchResults.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {searchResults.map((result) => {
                 const isOnTeam = team.some((m) => m.id === result.id);
                 return (
@@ -447,26 +426,14 @@ export default function TeamBuilder() {
                       disabled:opacity-50 is Tailwind's disabled: variant —
                       applies styles only when the element is disabled.
                     */
-                    className="flex flex-col items-center p-3 rounded-xl border border-pokemon-lightgray hover:border-pokemon-red hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-pokemon-lightgray disabled:hover:bg-transparent"
+                    className="border-pokemon-lightgray hover:border-pokemon-red disabled:hover:border-pokemon-lightgray flex flex-col items-center rounded-xl border p-3 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
                   >
-                    <Image
-                      src={getSpriteUrl(result.id)}
-                      width={48}
-                      height={48}
-                      alt={result.name}
-                      unoptimized
-                    />
-                    <span className="text-xs font-medium capitalize mt-1 text-pokemon-black">
+                    <Image src={getSpriteUrl(result.id)} width={48} height={48} alt={result.name} unoptimized />
+                    <span className="text-pokemon-black mt-1 text-xs font-medium capitalize">
                       {capitalize(result.name)}
                     </span>
-                    <span className="text-2xs text-pokemon-gray">
-                      {formatPokemonId(result.id)}
-                    </span>
-                    {isOnTeam && (
-                      <span className="text-2xs text-pokemon-red font-medium mt-0.5">
-                        On team
-                      </span>
-                    )}
+                    <span className="text-2xs text-pokemon-gray">{formatPokemonId(result.id)}</span>
+                    {isOnTeam && <span className="text-2xs text-pokemon-red mt-0.5 font-medium">On team</span>}
                   </button>
                 );
               })}
@@ -474,22 +441,22 @@ export default function TeamBuilder() {
           )}
 
           {/* Browse link */}
-          <p className="text-xs text-pokemon-gray mt-4 text-center">
-            Or{" "}
+          <p className="text-pokemon-gray mt-4 text-center text-xs">
+            Or{' '}
             <Link href="/pokedex" className="text-pokemon-blue hover:underline">
               browse the Pokédex
-            </Link>
-            {" "}and add from there.
+            </Link>{' '}
+            and add from there.
           </p>
         </div>
       )}
 
       {/* Full team message */}
       {team.length === MAX_TEAM_SIZE && (
-        <div className="text-center py-6 text-pokemon-gray">
-          <p className="text-2xl mb-2">🎉</p>
-          <p className="font-medium text-pokemon-black">Team complete!</p>
-          <p className="text-sm mt-1">You have a full party of 6.</p>
+        <div className="text-pokemon-gray py-6 text-center">
+          <p className="mb-2 text-2xl">🎉</p>
+          <p className="text-pokemon-black font-medium">Team complete!</p>
+          <p className="mt-1 text-sm">You have a full party of 6.</p>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /*
   components/WinnerModal.tsx
@@ -13,9 +13,9 @@
   All of these require "use client".
 */
 
-import { useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import {useEffect} from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export interface WheelPokemon {
   id: number;
@@ -41,24 +41,24 @@ interface WinnerModalProps {
   write the full class string (not a dynamic template literal).
 */
 const TYPE_GRADIENTS: Record<string, string> = {
-  normal:   "from-[#A8A878] to-[#6a6a4a]",
-  fire:     "from-[#F08030] to-[#a84000]",
-  water:    "from-[#6890F0] to-[#2040b0]",
-  electric: "from-[#F8D030] to-[#b09000]",
-  grass:    "from-[#78C850] to-[#387810]",
-  ice:      "from-[#98D8D8] to-[#409898]",
-  fighting: "from-[#C03028] to-[#700808]",
-  poison:   "from-[#A040A0] to-[#501060]",
-  ground:   "from-[#E0C068] to-[#906820]",
-  flying:   "from-[#A890F0] to-[#5030b0]",
-  psychic:  "from-[#F85888] to-[#a80838]",
-  bug:      "from-[#A8B820] to-[#587000]",
-  rock:     "from-[#B8A038] to-[#685800]",
-  ghost:    "from-[#705898] to-[#301850]",
-  dragon:   "from-[#7038F8] to-[#2800a8]",
-  dark:     "from-[#705848] to-[#281808]",
-  steel:    "from-[#B8B8D0] to-[#686880]",
-  fairy:    "from-[#EE99AC] to-[#a84060]",
+  normal: 'from-[#A8A878] to-[#6a6a4a]',
+  fire: 'from-[#F08030] to-[#a84000]',
+  water: 'from-[#6890F0] to-[#2040b0]',
+  electric: 'from-[#F8D030] to-[#b09000]',
+  grass: 'from-[#78C850] to-[#387810]',
+  ice: 'from-[#98D8D8] to-[#409898]',
+  fighting: 'from-[#C03028] to-[#700808]',
+  poison: 'from-[#A040A0] to-[#501060]',
+  ground: 'from-[#E0C068] to-[#906820]',
+  flying: 'from-[#A890F0] to-[#5030b0]',
+  psychic: 'from-[#F85888] to-[#a80838]',
+  bug: 'from-[#A8B820] to-[#587000]',
+  rock: 'from-[#B8A038] to-[#685800]',
+  ghost: 'from-[#705898] to-[#301850]',
+  dragon: 'from-[#7038F8] to-[#2800a8]',
+  dark: 'from-[#705848] to-[#281808]',
+  steel: 'from-[#B8B8D0] to-[#686880]',
+  fairy: 'from-[#EE99AC] to-[#a84060]',
 };
 
 /*
@@ -71,8 +71,8 @@ const TYPE_GRADIENTS: Record<string, string> = {
   delay, and duration — all calculated from the index so
   they're deterministic (same result every render).
 */
-function ConfettiParticle({ index }: { index: number }) {
-  const colors = ["#FF1111", "#FFDE00", "#3B4CCA", "#78C850", "#F08030", "#F85888"];
+function ConfettiParticle({index}: {index: number}) {
+  const colors = ['#FF1111', '#FFDE00', '#3B4CCA', '#78C850', '#F08030', '#F85888'];
   const color = colors[index % colors.length];
 
   /*
@@ -104,7 +104,7 @@ function ConfettiParticle({ index }: { index: number }) {
         any click/touch events. Clicks pass through it.
         In RN: pointerEvents="none" on a View — same idea.
       */
-      className="absolute top-0 pointer-events-none"
+      className="pointer-events-none absolute top-0"
       style={{
         left,
         width: size,
@@ -115,7 +115,7 @@ function ConfettiParticle({ index }: { index: number }) {
           In RN: borderRadius = width/2 for a circle.
           On web: 50% always makes a circle regardless of size.
         */
-        borderRadius: index % 2 === 0 ? "50%" : "2px",
+        borderRadius: index % 2 === 0 ? '50%' : '2px',
         /*
           CSS animation shorthand:
           `name duration delay timing-function fill-mode`
@@ -131,8 +131,8 @@ function ConfettiParticle({ index }: { index: number }) {
   );
 }
 
-export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModalProps) {
-  const gradientClass = TYPE_GRADIENTS[winner.primaryType] ?? "from-pokemon-red to-pokemon-darkred";
+export default function WinnerModal({winner, onClose, onSpinAgain}: WinnerModalProps) {
+  const gradientClass = TYPE_GRADIENTS[winner.primaryType] ?? 'from-pokemon-red to-pokemon-darkred';
   const displayName = winner.name.charAt(0).toUpperCase() + winner.name.slice(1);
   const artworkUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${winner.id}.png`;
 
@@ -153,8 +153,10 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
     standard useEffect cleanup pattern — same in RN and web.
   */
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   /*
@@ -173,9 +175,11 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
     same cleanup pattern as removing an RN event listener.
   */
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
   return (
@@ -199,15 +203,14 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
       p-4: 16px padding so the modal doesn't touch screen edges on mobile.
     */
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-
       {/* Confetti layer */}
       {/*
         absolute inset-0: fills the entire fixed overlay.
         overflow-hidden: clips confetti particles that go off-screen.
         pointer-events-none: clicks pass through to elements below.
       */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 32 }).map((_, i) => (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {Array.from({length: 32}).map((_, i) => (
           <ConfettiParticle key={i} index={i} />
         ))}
       </div>
@@ -230,10 +233,7 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
           In RN: you'd need @react-native-community/blur or similar.
           On web: one CSS property handles it natively.
       */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
       {/*
         MODAL CARD CONTAINER
@@ -244,8 +244,7 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
           In RN: you'd use maxWidth in a StyleSheet.
         mx-auto: centers horizontally (margin: 0 auto).
       */}
-      <div className="relative z-10 w-full max-w-sm mx-auto">
-
+      <div className="relative z-10 mx-auto w-full max-w-sm">
         {/*
           ✕ CLOSE BUTTON
           Positioned absolutely in the top-right corner,
@@ -276,8 +275,11 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
           In RN: same method, same use case — e.stopPropagation()
         */}
         <button
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute -top-4 -right-4 z-20 w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-center text-pokemon-black hover:bg-pokemon-lightgray transition-colors font-bold text-lg"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="text-pokemon-black hover:bg-pokemon-lightgray absolute -top-4 -right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg font-bold shadow-xl transition-colors"
           aria-label="Close"
         >
           ✕
@@ -322,11 +324,10 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
               Web-only concept — mice have cursors, touchscreens don't.
               In RN: no cursor concept exists.
           */}
-          <div className={`bg-gradient-to-br ${gradientClass} rounded-3xl overflow-hidden shadow-2xl cursor-pointer`}>
-
+          <div className={`bg-gradient-to-br ${gradientClass} cursor-pointer overflow-hidden rounded-3xl shadow-2xl`}>
             {/* "THE WHEEL CHOSE..." header text */}
-            <div className="text-center pt-8 pb-2 px-4">
-              <p className="font-[family-name:var(--font-pixel)] text-white/70 text-[10px] tracking-[0.2em] mb-2">
+            <div className="px-4 pt-8 pb-2 text-center">
+              <p className="mb-2 font-[family-name:var(--font-pixel)] text-[10px] tracking-[0.2em] text-white/70">
                 {/*
                   text-white/70: white at 70% opacity.
                   Same /opacity modifier we used on the backdrop.
@@ -342,7 +343,7 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
                 */}
                 THE WHEEL CHOSE...
               </p>
-              <h2 className="font-[family-name:var(--font-pixel)] text-white text-2xl drop-shadow-lg">
+              <h2 className="font-[family-name:var(--font-pixel)] text-2xl text-white drop-shadow-lg">
                 {/*
                   drop-shadow-lg: a CSS filter drop-shadow.
                   Different from box-shadow (shadow-lg):
@@ -367,9 +368,9 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
                   In RN: you'd use a shadow or a blurred View (complex).
                   On web: filter: blur() is one CSS property.
               */}
-              <div className="absolute w-44 h-44 bg-white/20 rounded-full blur-2xl" />
+              <div className="absolute h-44 w-44 rounded-full bg-white/20 blur-2xl" />
 
-                {/*
+              {/*
                   relative z-10: stacks the image above the blur circle.
                   Without z-10, the image would be behind the blur div
                   because it comes later in the DOM.
@@ -387,7 +388,7 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
                   alternate: plays forward then backward (ping-pong).
                   In RN: Animated.loop(Animated.sequence([...]))
                   On web: CSS keyframes with animation-direction: alternate
-                */ }
+                */}
               <Image
                 src={artworkUrl}
                 width={180}
@@ -395,12 +396,12 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
                 alt={winner.name}
                 unoptimized
                 className="relative z-10 drop-shadow-2xl"
-                style={{ animation: "winnerFloat 1.2s ease-in-out infinite alternate" }}
+                style={{animation: 'winnerFloat 1.2s ease-in-out infinite alternate'}}
               />
             </div>
 
-            <div className="text-center pb-6 px-4">
-              <p className="text-white/60 text-xs">Tap to learn more →</p>
+            <div className="px-4 pb-6 text-center">
+              <p className="text-xs text-white/60">Tap to learn more →</p>
             </div>
           </div>
         </Link>
@@ -420,8 +421,11 @@ export default function WinnerModal({ winner, onClose, onSpinAgain }: WinnerModa
           The Link above would fire without this.
         */}
         <button
-          onClick={(e) => { e.stopPropagation(); onSpinAgain(); }}
-          className="w-full mt-4 py-4 bg-pokemon-yellow text-pokemon-black font-[family-name:var(--font-pixel)] text-sm rounded-2xl shadow-lg hover:bg-yellow-300 active:scale-95 transition-all duration-150"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSpinAgain();
+          }}
+          className="bg-pokemon-yellow text-pokemon-black mt-4 w-full rounded-2xl py-4 font-[family-name:var(--font-pixel)] text-sm shadow-lg transition-all duration-150 hover:bg-yellow-300 active:scale-95"
         >
           SPIN AGAIN!
         </button>

@@ -122,7 +122,7 @@ export interface PokemonSprites {
   back_default: string | null;
   back_shiny: string | null;
   other: {
-    "official-artwork": {
+    'official-artwork': {
       front_default: string | null;
       front_shiny: string | null;
     };
@@ -151,13 +151,13 @@ export interface PokemonSprites {
  * you access. Extra fields from the API are silently ignored.
  */
 export interface Pokemon {
-  id: number;               // National Pokédex number (1 = Bulbasaur, 25 = Pikachu)
-  name: string;             // Lowercase name ("pikachu", "bulbasaur")
-  base_experience: number;  // XP gained when defeating this Pokémon
-  height: number;           // In decimetres (divide by 10 for metres)
-  weight: number;           // In hectograms (divide by 10 for kg)
-  is_default: boolean;      // False for alternate forms (mega, galar, etc.)
-  order: number;            // Sort order within the National Dex
+  id: number; // National Pokédex number (1 = Bulbasaur, 25 = Pikachu)
+  name: string; // Lowercase name ("pikachu", "bulbasaur")
+  base_experience: number; // XP gained when defeating this Pokémon
+  height: number; // In decimetres (divide by 10 for metres)
+  weight: number; // In hectograms (divide by 10 for kg)
+  is_default: boolean; // False for alternate forms (mega, galar, etc.)
+  order: number; // Sort order within the National Dex
   abilities: PokemonAbility[];
   moves: PokemonMove[];
   sprites: PokemonSprites;
@@ -206,9 +206,9 @@ export interface PokemonListResponse {
  * We'll filter for English and for Let's Go Pikachu specifically.
  */
 export interface FlavorTextEntry {
-  flavor_text: string;         // The actual Pokédex description text
-  language: NamedAPIResource;  // { name: "en", url: "..." }
-  version: NamedAPIResource;   // { name: "lets-go-pikachu", url: "..." }
+  flavor_text: string; // The actual Pokédex description text
+  language: NamedAPIResource; // { name: "en", url: "..." }
+  version: NamedAPIResource; // { name: "lets-go-pikachu", url: "..." }
 }
 
 /**
@@ -227,17 +227,17 @@ export interface GenusEntry {
 export interface PokemonSpecies {
   id: number;
   name: string;
-  base_happiness: number;     // How happy it starts at when caught
-  capture_rate: number;       // 0-255, higher = easier to catch
-  color: NamedAPIResource;    // General color category ("red", "blue", etc.)
+  base_happiness: number; // How happy it starts at when caught
+  capture_rate: number; // 0-255, higher = easier to catch
+  color: NamedAPIResource; // General color category ("red", "blue", etc.)
   evolution_chain: {
-    url: string;              // URL to fetch the evolution chain
+    url: string; // URL to fetch the evolution chain
   };
   flavor_text_entries: FlavorTextEntry[];
   genera: GenusEntry[];
   is_legendary: boolean;
   is_mythical: boolean;
-  shape: NamedAPIResource;    // Body shape category
+  shape: NamedAPIResource; // Body shape category
   growth_rate: NamedAPIResource;
 }
 
@@ -252,11 +252,11 @@ export interface PokemonSpecies {
  * Most fields are null unless that specific condition applies.
  */
 export interface EvolutionDetail {
-  trigger: NamedAPIResource;        // "level-up", "use-item", "trade", etc.
-  item: NamedAPIResource | null;    // Item required (e.g. Thunder Stone)
-  min_level: number | null;         // Minimum level required
-  min_happiness: number | null;     // Minimum happiness required
-  time_of_day: string;              // "day", "night", or "" for anytime
+  trigger: NamedAPIResource; // "level-up", "use-item", "trade", etc.
+  item: NamedAPIResource | null; // Item required (e.g. Thunder Stone)
+  min_level: number | null; // Minimum level required
+  min_happiness: number | null; // Minimum happiness required
+  time_of_day: string; // "day", "night", or "" for anytime
   held_item: NamedAPIResource | null;
   known_move: NamedAPIResource | null;
   location: NamedAPIResource | null;
@@ -275,7 +275,7 @@ export interface EvolutionDetail {
 export interface ChainLink {
   species: NamedAPIResource;
   evolution_details: EvolutionDetail[];
-  evolves_to: ChainLink[];  // Recursive!
+  evolves_to: ChainLink[]; // Recursive!
   is_baby: boolean;
 }
 
@@ -284,7 +284,7 @@ export interface ChainLink {
  */
 export interface EvolutionChain {
   id: number;
-  chain: ChainLink;  // The root of the chain (always the base form)
+  chain: ChainLink; // The root of the chain (always the base form)
 }
 
 /* ============================================================
@@ -345,15 +345,15 @@ export interface MoveFlavorText {
 export interface Move {
   id: number;
   name: string;
-  accuracy: number | null;   // null for moves that always hit
-  pp: number;                // Power Points — how many times it can be used
-  power: number | null;      // null for status moves
-  priority: number;          // -7 to +7, higher = goes first
-  damage_class: NamedAPIResource;  // "physical", "special", "status"
+  accuracy: number | null; // null for moves that always hit
+  pp: number; // Power Points — how many times it can be used
+  power: number | null; // null for status moves
+  priority: number; // -7 to +7, higher = goes first
+  damage_class: NamedAPIResource; // "physical", "special", "status"
   type: NamedAPIResource;
-  effect_chance: number | null;    // % chance of secondary effect
+  effect_chance: number | null; // % chance of secondary effect
   flavor_text_entries: MoveFlavorText[];
-  target: NamedAPIResource;        // Who the move targets
+  target: NamedAPIResource; // Who the move targets
 }
 
 /* ============================================================
@@ -369,9 +369,9 @@ export interface TeamMember {
   id: number;
   name: string;
   sprite: string | null;
-  types: string[];           // Array of type names ["fire", "flying"]
-  addedAt: number;           // timestamp — Date.now()
-  nickname?: string;         // Optional nickname the user can set
+  types: string[]; // Array of type names ["fire", "flying"]
+  addedAt: number; // timestamp — Date.now()
+  nickname?: string; // Optional nickname the user can set
 }
 
 /**
@@ -379,12 +379,12 @@ export interface TeamMember {
  * PokéAPI uses abbreviations; we want readable names.
  */
 export const STAT_NAMES: Record<string, string> = {
-  hp: "HP",
-  attack: "Attack",
-  defense: "Defense",
-  "special-attack": "Sp. Atk",
-  "special-defense": "Sp. Def",
-  speed: "Speed",
+  hp: 'HP',
+  attack: 'Attack',
+  defense: 'Defense',
+  'special-attack': 'Sp. Atk',
+  'special-defense': 'Sp. Def',
+  speed: 'Speed',
 };
 
 /**
@@ -394,9 +394,24 @@ export const STAT_NAMES: Record<string, string> = {
  * instead of just string[].
  */
 export const POKEMON_TYPES = [
-  "normal", "fire", "water", "electric", "grass", "ice",
-  "fighting", "poison", "ground", "flying", "psychic", "bug",
-  "rock", "ghost", "dragon", "dark", "steel", "fairy",
+  'normal',
+  'fire',
+  'water',
+  'electric',
+  'grass',
+  'ice',
+  'fighting',
+  'poison',
+  'ground',
+  'flying',
+  'psychic',
+  'bug',
+  'rock',
+  'ghost',
+  'dragon',
+  'dark',
+  'steel',
+  'fairy',
 ] as const;
 
 /**
@@ -409,14 +424,14 @@ export const POKEMON_TYPES = [
  *
  * Now TypeScript will error if you pass "fyre" instead of "fire".
  */
-export type PokemonTypeName = typeof POKEMON_TYPES[number];
+export type PokemonTypeName = (typeof POKEMON_TYPES)[number];
 
 /**
  * Let's Go Pikachu version group identifier used in PokéAPI.
  * We'll filter moves and flavor text to this version.
  */
-export const LETS_GO_VERSION_GROUP = "lets-go-pikachu-lets-go-eevee";
-export const LETS_GO_VERSION = "lets-go-pikachu";
+export const LETS_GO_VERSION_GROUP = 'lets-go-pikachu-lets-go-eevee';
+export const LETS_GO_VERSION = 'lets-go-pikachu';
 
 /**
  * The 151 original Pokémon are in Let's Go Pikachu.

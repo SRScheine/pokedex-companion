@@ -85,10 +85,10 @@ import {
   LETS_GO_VERSION_GROUP,
   LETS_GO_VERSION,
   FlavorTextEntry,
-} from "@/types/pokemon";
+} from '@/types/pokemon';
 
 // Base URL for all PokéAPI requests
-const BASE_URL = "https://pokeapi.co/api/v2";
+const BASE_URL = 'https://pokeapi.co/api/v2';
 
 /* ============================================================
    CORE FETCH HELPER
@@ -112,13 +112,10 @@ const BASE_URL = "https://pokeapi.co/api/v2";
  *
  * TypeScript generics work identically in RN and web.
  */
-async function apiFetch<T>(
-  endpoint: string,
-  options: { cache?: RequestCache; revalidate?: number } = {}
-): Promise<T> {
-  const url = endpoint.startsWith("http")
-    ? endpoint  // Full URL (for when PokéAPI gives us a URL directly)
-    : `${BASE_URL}${endpoint}`;  // Relative endpoint
+async function apiFetch<T>(endpoint: string, options: {cache?: RequestCache; revalidate?: number} = {}): Promise<T> {
+  const url = endpoint.startsWith('http')
+    ? endpoint // Full URL (for when PokéAPI gives us a URL directly)
+    : `${BASE_URL}${endpoint}`; // Relative endpoint
 
   const response = await fetch(url, {
     /*
@@ -131,8 +128,8 @@ async function apiFetch<T>(
       at build time. In React Native, fetch is just standard fetch
       with no caching extensions.
     */
-    cache: options.revalidate ? undefined : (options.cache ?? "force-cache"),
-    next: options.revalidate ? { revalidate: options.revalidate } : undefined,
+    cache: options.revalidate ? undefined : (options.cache ?? 'force-cache'),
+    next: options.revalidate ? {revalidate: options.revalidate} : undefined,
   });
 
   if (!response.ok) {
@@ -156,15 +153,10 @@ async function apiFetch<T>(
  * @param limit  How many to fetch (max 151 for our app)
  * @param offset How many to skip (for pagination)
  */
-export async function getPokemonList(
-  limit: number = 20,
-  offset: number = 0
-): Promise<PokemonListResponse> {
+export async function getPokemonList(limit: number = 20, offset: number = 0): Promise<PokemonListResponse> {
   // Clamp limit so we never fetch beyond Gen 1
   const clampedLimit = Math.min(limit, LETS_GO_MAX_POKEMON - offset);
-  return apiFetch<PokemonListResponse>(
-    `/pokemon?limit=${clampedLimit}&offset=${offset}`
-  );
+  return apiFetch<PokemonListResponse>(`/pokemon?limit=${clampedLimit}&offset=${offset}`);
 }
 
 /**
@@ -181,10 +173,7 @@ export async function getPokemonList(
  * @param limit  Number of Pokémon per page
  * @param offset Starting offset for pagination
  */
-export async function getPokemonListWithDetails(
-  limit: number = 20,
-  offset: number = 0
-): Promise<Pokemon[]> {
+export async function getPokemonListWithDetails(limit: number = 20, offset: number = 0): Promise<Pokemon[]> {
   const listData = await getPokemonList(limit, offset);
 
   /*
@@ -208,11 +197,7 @@ export async function getPokemonListWithDetails(
     This is being a "good steward" of PokéAPI — fewer sequential
     round trips, faster for the user, same total load on the server.
   */
-  const pokemonDetails = await Promise.all(
-    listData.results.map((item) =>
-      apiFetch<Pokemon>(item.url)
-    )
-  );
+  const pokemonDetails = await Promise.all(listData.results.map((item) => apiFetch<Pokemon>(item.url)));
 
   return pokemonDetails;
 }
@@ -229,14 +214,12 @@ export async function getPokemonListWithDetails(
  *
  * @param idOrName  National Dex number (25) or name ("pikachu")
  */
-export async function getPokemon(
-  idOrName: string | number
-): Promise<Pokemon | null> {
+export async function getPokemon(idOrName: string | number): Promise<Pokemon | null> {
   try {
     return await apiFetch<Pokemon>(`/pokemon/${idOrName}`);
   } catch (error) {
     // Return null for 404s, re-throw for other errors
-    if (error instanceof Error && error.message.includes("404")) {
+    if (error instanceof Error && error.message.includes('404')) {
       return null;
     }
     throw error;
@@ -252,13 +235,11 @@ export async function getPokemon(
  *
  * @param idOrName  National Dex number or name
  */
-export async function getPokemonSpecies(
-  idOrName: string | number
-): Promise<PokemonSpecies | null> {
+export async function getPokemonSpecies(idOrName: string | number): Promise<PokemonSpecies | null> {
   try {
     return await apiFetch<PokemonSpecies>(`/pokemon-species/${idOrName}`);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("404")) {
+    if (error instanceof Error && error.message.includes('404')) {
       return null;
     }
     throw error;
@@ -280,10 +261,7 @@ export async function getPokemonWithSpecies(
     TypeScript infers the tuple type automatically here.
     This is one of the nicest TypeScript + async patterns.
   */
-  return Promise.all([
-    getPokemon(idOrName),
-    getPokemonSpecies(idOrName),
-  ]);
+  return Promise.all([getPokemon(idOrName), getPokemonSpecies(idOrName)]);
 }
 
 /**
@@ -297,26 +275,18 @@ export async function getPokemonWithSpecies(
  * The flavor text from PokéAPI has weird escaped whitespace
  * characters (\f, \n) that we clean up before displaying.
  */
-export function getEnglishFlavorText(
-  entries: FlavorTextEntry[]
-): string {
+export function getEnglishFlavorText(entries: FlavorTextEntry[]): string {
   // Try to find Let's Go Pikachu specifically
-  const letsGoEntry = entries.find(
-    (entry) =>
-      entry.language.name === "en" &&
-      entry.version.name === LETS_GO_VERSION
-  );
+  const letsGoEntry = entries.find((entry) => entry.language.name === 'en' && entry.version.name === LETS_GO_VERSION);
 
   if (letsGoEntry) {
     return cleanFlavorText(letsGoEntry.flavor_text);
   }
 
   // Fall back to any English entry
-  const englishEntry = entries.find(
-    (entry) => entry.language.name === "en"
-  );
+  const englishEntry = entries.find((entry) => entry.language.name === 'en');
 
-  return englishEntry ? cleanFlavorText(englishEntry.flavor_text) : "";
+  return englishEntry ? cleanFlavorText(englishEntry.flavor_text) : '';
 }
 
 /**
@@ -327,9 +297,9 @@ export function getEnglishFlavorText(
  */
 function cleanFlavorText(text: string): string {
   return text
-    .replace(/\f/g, " ")   // form feed → space
-    .replace(/\n/g, " ")   // newline → space
-    .replace(/\s+/g, " ")  // multiple spaces → single space
+    .replace(/\f/g, ' ') // form feed → space
+    .replace(/\n/g, ' ') // newline → space
+    .replace(/\s+/g, ' ') // multiple spaces → single space
     .trim();
 }
 
@@ -345,9 +315,7 @@ function cleanFlavorText(text: string): string {
  *
  * @param evolutionChainUrl  The URL from species.evolution_chain.url
  */
-export async function getEvolutionChain(
-  evolutionChainUrl: string
-): Promise<EvolutionChain> {
+export async function getEvolutionChain(evolutionChainUrl: string): Promise<EvolutionChain> {
   return apiFetch<EvolutionChain>(evolutionChainUrl);
 }
 
@@ -361,26 +329,24 @@ export async function getEvolutionChain(
  * need a short phrase such as "Lv. 16", "Thunder Stone" or "Trade".
  */
 export function formatEvolutionDetails(details: EvolutionDetail[]): string {
-  if (!details || details.length === 0) return "";
+  if (!details || details.length === 0) return '';
   const d = details[0]; // most chains only have one entry
 
-  const humanize = (name: string) =>
-    capitalize(name.replace(/-/g, " "));
+  const humanize = (name: string) => capitalize(name.replace(/-/g, ' '));
 
   switch (d.trigger.name) {
-    case "level-up":
+    case 'level-up':
       if (d.min_level) return `Lv. ${d.min_level}`;
       if (d.min_happiness) return `Happiness ≥ ${d.min_happiness}`;
       if (d.time_of_day) return capitalize(d.time_of_day);
       if (d.location) return capitalize(d.location.name);
       break;
-    case "use-item":
+    case 'use-item':
       if (d.item) return humanize(d.item.name); // full name, e.g. "Thunder Stone"
       break;
-    case "trade":
-      if (d.held_item)
-        return `Trade holding ${humanize(d.held_item.name)}`;
-      return "Trade";
+    case 'trade':
+      if (d.held_item) return `Trade holding ${humanize(d.held_item.name)}`;
+      return 'Trade';
     default:
       return humanize(d.trigger.name);
   }
@@ -422,18 +388,14 @@ export interface FlatEvolution {
   details: EvolutionDetail[];
 }
 
-export function flattenEvolutionChain(
-  chain: EvolutionChain["chain"]
-): FlatEvolution[] {
+export function flattenEvolutionChain(chain: EvolutionChain['chain']): FlatEvolution[] {
   const result: FlatEvolution[] = [];
 
   // Recursive helper
-  function traverse(link: EvolutionChain["chain"]) {
+  function traverse(link: EvolutionChain['chain']) {
     // Extract ID from the species URL and only include if it's in Let's Go
-    const evoId = parseInt(
-      link.species.url.split("/").filter(Boolean).pop() ?? "0"
-    );
-    
+    const evoId = parseInt(link.species.url.split('/').filter(Boolean).pop() ?? '0');
+
     if (evoId <= LETS_GO_MAX_POKEMON) {
       result.push({
         name: link.species.name,
@@ -442,7 +404,7 @@ export function flattenEvolutionChain(
         details: link.evolution_details,
       });
     }
-    
+
     // Recurse into each evolution
     link.evolves_to.forEach(traverse);
   }
@@ -450,7 +412,6 @@ export function flattenEvolutionChain(
   traverse(chain);
   return result;
 }
-
 
 /* ============================================================
    TYPE FUNCTIONS
@@ -462,9 +423,7 @@ export function flattenEvolutionChain(
  *
  * @param typeName  e.g. "fire", "water", "psychic"
  */
-export async function getTypeData(
-  typeName: string
-): Promise<PokemonTypeData> {
+export async function getTypeData(typeName: string): Promise<PokemonTypeData> {
   return apiFetch<PokemonTypeData>(`/type/${typeName}`);
 }
 
@@ -475,9 +434,7 @@ export async function getTypeData(
  *
  * @param typeNames  Array of type names ["fire", "flying"]
  */
-export async function getMultipleTypeData(
-  typeNames: string[]
-): Promise<PokemonTypeData[]> {
+export async function getMultipleTypeData(typeNames: string[]): Promise<PokemonTypeData[]> {
   return Promise.all(typeNames.map(getTypeData));
 }
 
@@ -493,27 +450,25 @@ export async function getMultipleTypeData(
  *   - 0.5x from each type that resists = 0.25x total
  *   - 0x from any immunity = 0x total (immune)
  */
-export function calculateTypeEffectiveness(
-  typeDataList: PokemonTypeData[]
-): Record<string, number> {
+export function calculateTypeEffectiveness(typeDataList: PokemonTypeData[]): Record<string, number> {
   // Start with all types doing 1x damage
   const effectiveness: Record<string, number> = {};
 
   for (const typeData of typeDataList) {
-    const { damage_relations } = typeData;
+    const {damage_relations} = typeData;
 
     // Apply double damage (2x)
-    damage_relations.double_damage_from.forEach(({ name }) => {
+    damage_relations.double_damage_from.forEach(({name}) => {
       effectiveness[name] = (effectiveness[name] ?? 1) * 2;
     });
 
     // Apply half damage (0.5x)
-    damage_relations.half_damage_from.forEach(({ name }) => {
+    damage_relations.half_damage_from.forEach(({name}) => {
       effectiveness[name] = (effectiveness[name] ?? 1) * 0.5;
     });
 
     // Apply immunity (0x) — overrides everything
-    damage_relations.no_damage_from.forEach(({ name }) => {
+    damage_relations.no_damage_from.forEach(({name}) => {
       effectiveness[name] = 0;
     });
   }
@@ -530,13 +485,11 @@ export function calculateTypeEffectiveness(
  *
  * @param nameOrId  e.g. "thunderbolt" or 85
  */
-export async function getMove(
-  nameOrId: string | number
-): Promise<Move | null> {
+export async function getMove(nameOrId: string | number): Promise<Move | null> {
   try {
     return await apiFetch<Move>(`/move/${nameOrId}`);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("404")) {
+    if (error instanceof Error && error.message.includes('404')) {
       return null;
     }
     throw error;
@@ -554,7 +507,7 @@ export async function getMove(
  */
 export function getLetsGoMoves(
   pokemon: Pokemon
-): Array<{ name: string; url: string; learnMethod: string; level: number }> {
+): Array<{name: string; url: string; learnMethod: string; level: number}> {
   const letsGoMoves: Array<{
     name: string;
     url: string;
@@ -580,9 +533,9 @@ export function getLetsGoMoves(
 
   // Sort: level-up moves first (sorted by level), then others alphabetically
   return letsGoMoves.sort((a, b) => {
-    if (a.learnMethod === "level-up" && b.learnMethod !== "level-up") return -1;
-    if (a.learnMethod !== "level-up" && b.learnMethod === "level-up") return 1;
-    if (a.learnMethod === "level-up" && b.learnMethod === "level-up") {
+    if (a.learnMethod === 'level-up' && b.learnMethod !== 'level-up') return -1;
+    if (a.learnMethod !== 'level-up' && b.learnMethod === 'level-up') return 1;
+    if (a.learnMethod === 'level-up' && b.learnMethod === 'level-up') {
       return a.level - b.level;
     }
     return a.name.localeCompare(b.name);
@@ -606,15 +559,11 @@ export function getLetsGoMoves(
  *
  * @param query  Search string (case-insensitive partial match)
  */
-export async function searchPokemon(
-  query: string
-): Promise<Array<{ name: string; id: number; url: string }>> {
+export async function searchPokemon(query: string): Promise<Array<{name: string; id: number; url: string}>> {
   if (!query.trim()) return [];
 
   // Fetch all 151 Pokémon names (cached after first call)
-  const allPokemon = await apiFetch<PokemonListResponse>(
-    `/pokemon?limit=${LETS_GO_MAX_POKEMON}&offset=0`
-  );
+  const allPokemon = await apiFetch<PokemonListResponse>(`/pokemon?limit=${LETS_GO_MAX_POKEMON}&offset=0`);
 
   const lowerQuery = query.toLowerCase().trim();
 
@@ -624,7 +573,7 @@ export async function searchPokemon(
       name: p.name,
       url: p.url,
       // Extract the ID from the URL: ".../pokemon/25/" → 25
-      id: parseInt(p.url.split("/").filter(Boolean).pop() ?? "0"),
+      id: parseInt(p.url.split('/').filter(Boolean).pop() ?? '0'),
     }));
 }
 
@@ -639,7 +588,7 @@ export async function searchPokemon(
  * String.padStart is standard JavaScript — same in RN and web.
  */
 export function formatPokemonId(id: number): string {
-  return `#${String(id).padStart(3, "0")}`;
+  return `#${String(id).padStart(3, '0')}`;
 }
 
 /**
@@ -647,7 +596,7 @@ export function formatPokemonId(id: number): string {
  * PokéAPI returns all names in lowercase ("pikachu" → "Pikachu")
  */
 export function capitalize(str: string): string {
-  if (!str) return "";
+  if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -657,10 +606,7 @@ export function capitalize(str: string): string {
  * "lets-go-pikachu" → "Lets Go Pikachu"
  */
 export function formatName(str: string): string {
-  return str
-    .split("-")
-    .map(capitalize)
-    .join(" ");
+  return str.split('-').map(capitalize).join(' ');
 }
 
 /**
@@ -671,8 +617,8 @@ export function formatName(str: string): string {
  * Useful for lists where we want to show images without
  * fetching full Pokémon data.
  */
-export function getSpriteUrl(id: number, type: "sprite" | "artwork" = "sprite"): string {
-  if (type === "artwork") {
+export function getSpriteUrl(id: number, type: 'sprite' | 'artwork' = 'sprite'): string {
+  if (type === 'artwork') {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
   }
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -689,7 +635,7 @@ export function formatHeight(decimetres: number): string {
 
 /**
  * Convert weight from hectograms to a readable format.
- * PokéAPI: 60 → "6.0 kg"  
+ * PokéAPI: 60 → "6.0 kg"
  */
 export function formatWeight(hectograms: number): string {
   const kg = hectograms / 10;
@@ -702,8 +648,8 @@ export function formatWeight(hectograms: number): string {
  * Low stats are red, mid are yellow, high are green.
  */
 export function getStatColor(value: number): string {
-  if (value < 25) return "bg-red-400";
-  if (value < 50) return "bg-yellow-400";
-  if (value < 75) return "bg-green-400";
-  return "bg-emerald-500";
+  if (value < 25) return 'bg-red-400';
+  if (value < 50) return 'bg-yellow-400';
+  if (value < 75) return 'bg-green-400';
+  return 'bg-emerald-500';
 }

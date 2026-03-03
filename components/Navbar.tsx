@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /*
   components/Navbar.tsx — The Navigation Bar
@@ -56,20 +56,20 @@
   mobile-first by convention.
 */
 
-import { useState } from "react";
+import {useState} from 'react';
 // next/link: the web equivalent of React Navigation's <Link> or
 // navigation.navigate(). It renders an <a> tag but intercepts clicks
 // to do client-side navigation (no full page reload).
-import Link from "next/link";
+import Link from 'next/link';
 // usePathname: returns the current URL path ("/pokedex", "/team", etc.)
 // This is like useRoute() or useNavigationState() in React Navigation —
 // useful for knowing which screen/page is currently active.
-import { usePathname } from "next/navigation";
+import {usePathname} from 'next/navigation';
 // next/image: an optimized <img> replacement. Handles lazy loading,
 // responsive sizing, and format conversion automatically.
 // In RN you used <Image source={require('./asset.png')} />.
 // On web, next/image is the equivalent for best practices.
-import Image from "next/image";
+import Image from 'next/image';
 
 // ============================================================
 // TYPES
@@ -85,10 +85,10 @@ interface NavLink {
 // Our navigation structure. These href values map directly to
 // folder names in the app/ directory (file-based routing).
 const NAV_LINKS: NavLink[] = [
-  { href: "/pokedex", label: "Pokédex", emoji: "📖" },
-  { href: "/type-chart", label: "Type Chart", emoji: "⚔️" },
-  { href: "/team", label: "My Team", emoji: "⭐" },
-  { href: "/spin", label: "Spin!", emoji: "🎡" },
+  {href: '/pokedex', label: 'Pokédex', emoji: '📖'},
+  {href: '/type-chart', label: 'Type Chart', emoji: '⚔️'},
+  {href: '/team', label: 'My Team', emoji: '⭐'},
+  {href: '/spin', label: 'Spin!', emoji: '🎡'},
 ];
 
 // ============================================================
@@ -105,7 +105,7 @@ export default function Navbar() {
     restriction because everything is a "client" component.
   */
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   /*
     usePathname(): returns the current URL path.
     We'll use this to add an "active" style to the current nav link.
@@ -141,7 +141,7 @@ export default function Navbar() {
           In RN: shadowColor, shadowOffset, shadowOpacity, shadowRadius
           On web: one `box-shadow` value handles all of that.
     */
-    <header className="fixed top-0 left-0 right-0 z-50 bg-pokemon-red shadow-md">
+    <header className="bg-pokemon-red fixed top-0 right-0 left-0 z-50 shadow-md">
       {/*
         max-w-6xl mx-auto px-4
           → max-w-6xl: caps the content width at 1152px on wide screens
@@ -162,8 +162,7 @@ export default function Navbar() {
             - Web needs `display: flex` first; RN Views are flex by default
             - Tailwind's `flex` class handles the `display: flex` part
       */}
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* ── LOGO ── */}
         {/*
           <Link href="/"> is the web equivalent of:
@@ -213,7 +212,7 @@ export default function Navbar() {
             sm:text-sm: restore the regular small size at 640px+
             block: visible on all screen sizes (was previously hidden on mobile)
           */}
-          <span className="font-[family-name:var(--font-pixel)] text-pokemon-yellow text-xs sm:text-sm block">
+          <span className="text-pokemon-yellow block font-[family-name:var(--font-pixel)] text-xs sm:text-sm">
             PokéCompanion
           </span>
         </Link>
@@ -229,7 +228,7 @@ export default function Navbar() {
           
           items-center gap-1: flex row with small gaps between links
         */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
             /*
               Active link detection:
@@ -241,7 +240,7 @@ export default function Navbar() {
               This is like checking route.name in React Navigation.
             */
             const isActive = pathname.startsWith(link.href);
-            
+
             return (
               <Link
                 key={link.href}
@@ -256,14 +255,9 @@ export default function Navbar() {
                   for simple cases, or the `clsx` / `cn` utility for complex ones.
                   We'll install clsx later for cleaner conditional classes.
                 */
-                className={`
-                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium
-                  transition-colors duration-150
-                  ${isActive
-                    ? "bg-pokemon-darkred text-white"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                  }
-                `}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${
+                  isActive ? 'bg-pokemon-darkred text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                } `}
               >
                 <span>{link.emoji}</span>
                 <span>{link.label}</span>
@@ -293,7 +287,7 @@ export default function Navbar() {
         */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden flex flex-col gap-1.5 p-2 text-white"
+          className="flex flex-col gap-1.5 p-2 text-white md:hidden"
           aria-label="Toggle mobile menu"
           aria-expanded={isMobileMenuOpen}
         >
@@ -317,18 +311,16 @@ export default function Navbar() {
             On web, pure CSS handles this with no JS overhead.
           */}
           <span
-            className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-              isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
+            className={`block h-0.5 w-6 bg-white transition-all duration-300 ${
+              isMobileMenuOpen ? 'translate-y-2 rotate-45' : ''
             }`}
           />
           <span
-            className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-              isMobileMenuOpen ? "opacity-0" : ""
-            }`}
+            className={`block h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}
           />
           <span
-            className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-              isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
+            className={`block h-0.5 w-6 bg-white transition-all duration-300 ${
+              isMobileMenuOpen ? '-translate-y-2 -rotate-45' : ''
             }`}
           />
         </button>
@@ -358,12 +350,9 @@ export default function Navbar() {
         the dropdown from the main bar.
       */}
       <div
-        className={`
-          md:hidden overflow-hidden transition-all duration-300 bg-pokemon-darkred
-          ${isMobileMenuOpen ? "max-h-64" : "max-h-0"}
-        `}
+        className={`bg-pokemon-darkred overflow-hidden transition-all duration-300 md:hidden ${isMobileMenuOpen ? 'max-h-64' : 'max-h-0'} `}
       >
-        <nav className="max-w-6xl mx-auto px-4 py-2 flex flex-col gap-1">
+        <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-2">
           {NAV_LINKS.map((link) => {
             const isActive = pathname.startsWith(link.href);
             return (
@@ -377,14 +366,9 @@ export default function Navbar() {
                   Here, we manually update state.
                 */
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg font-medium
-                  transition-colors duration-150
-                  ${isActive
-                    ? "bg-black/20 text-white"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                  }
-                `}
+                className={`flex items-center gap-3 rounded-lg px-4 py-3 font-medium transition-colors duration-150 ${
+                  isActive ? 'bg-black/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                } `}
               >
                 <span className="text-xl">{link.emoji}</span>
                 <span>{link.label}</span>

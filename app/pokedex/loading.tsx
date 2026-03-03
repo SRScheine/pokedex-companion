@@ -57,13 +57,13 @@ function CardSkeleton() {
 
       rounded-2xl: matches the card border radius
     */
-    <div className="card flex flex-col items-center text-center animate-pulse">
+    <div className="card flex animate-pulse flex-col items-center text-center">
       {/* ID placeholder */}
-      <div className="skeleton h-3 w-8 rounded mb-2 self-start" />
+      <div className="skeleton mb-2 h-3 w-8 self-start rounded" />
       {/* Sprite placeholder */}
-      <div className="skeleton w-24 h-24 rounded-full mb-2" />
+      <div className="skeleton mb-2 h-24 w-24 rounded-full" />
       {/* Name placeholder */}
-      <div className="skeleton h-4 w-20 rounded mb-2" />
+      <div className="skeleton mb-2 h-4 w-20 rounded" />
       {/* Type badge placeholders */}
       <div className="flex gap-1">
         <div className="skeleton h-5 w-12 rounded-full" />
@@ -75,16 +75,15 @@ function CardSkeleton() {
 
 export default function PokedexLoading() {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-
+    <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header skeleton */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 animate-pulse">
+      <div className="mb-8 flex animate-pulse flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <div className="skeleton h-6 w-32 rounded mb-2" />
+          <div className="skeleton mb-2 h-6 w-32 rounded" />
           <div className="skeleton h-4 w-48 rounded" />
         </div>
         {/* Search bar skeleton */}
-        <div className="skeleton h-10 w-full md:w-80 rounded-full" />
+        <div className="skeleton h-10 w-full rounded-full md:w-80" />
       </div>
 
       {/*
@@ -93,8 +92,8 @@ export default function PokedexLoading() {
         Array.from({ length: 20 }) creates an array of 20 items
         so we can map over it. Same trick works in RN.
       */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {Array.from({ length: 20 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {Array.from({length: 20}).map((_, i) => (
           <CardSkeleton key={i} />
         ))}
       </div>

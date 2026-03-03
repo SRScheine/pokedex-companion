@@ -49,18 +49,18 @@
   Everything else will feel much more like React Native.
 */
 
-import type { Metadata } from "next";
+import type {Metadata} from 'next';
 // next/font: Next.js has a built-in font system that downloads Google Fonts
 // at BUILD TIME and serves them from your own domain. This is better for
 // performance and privacy than loading fonts from Google's servers at runtime.
 // In RN, you'd use expo-font or embed font files in your assets folder.
-import { Press_Start_2P, Inter } from "next/font/google";
-import "./globals.css";
-import Navbar from "@/components/Navbar";
+import {Press_Start_2P, Inter} from 'next/font/google';
+import './globals.css';
+import Navbar from '@/components/Navbar';
 
 // ============================================================
 // FONT CONFIGURATION
-// 
+//
 // Press_Start_2P: the classic pixelated Pokémon-style font.
 //   We'll use it for headings and the logo.
 // Inter: clean, readable sans-serif for body text and UI.
@@ -75,16 +75,16 @@ import Navbar from "@/components/Navbar";
 // This keeps the font file small — important for mobile performance.
 // ============================================================
 const pixelFont = Press_Start_2P({
-  weight: "400", // Press Start 2P only comes in one weight
-  subsets: ["latin"],
-  variable: "--font-pixel",
-  display: "swap", // Show fallback font while loading, then swap. Better UX than invisible text.
+  weight: '400', // Press Start 2P only comes in one weight
+  subsets: ['latin'],
+  variable: '--font-pixel',
+  display: 'swap', // Show fallback font while loading, then swap. Better UX than invisible text.
 });
 
 const bodyFont = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
 });
 
 // ============================================================
@@ -104,15 +104,15 @@ export const metadata: Metadata = {
   title: {
     // Template: page-specific titles will replace %s
     // e.g., the Pokédex page will show "Pokédex | Pokémon Companion"
-    template: "%s | Pokémon Companion",
+    template: '%s | Pokémon Companion',
     // Default: shown when a page doesn't set its own title
-    default: "Pokémon Companion",
+    default: 'Pokémon Companion',
   },
   description:
     "Your pocket companion for Pokémon Let's Go Pikachu. Look up Pokémon, plan your team, and master type matchups.",
   // Icons: the favicon (the little icon in browser tabs)
   icons: {
-    icon: "/favicon.ico",
+    icon: '/favicon.ico',
   },
 };
 
@@ -137,11 +137,7 @@ export const metadata: Metadata = {
 //
 // Here we return the HTML shell + our Navbar + whatever page is active.
 // ============================================================
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     /*
       <html> and <body> tags:
@@ -162,11 +158,7 @@ export default function RootLayout({
       warning that fires when browser extensions (like dark mode tools)
       modify the DOM before React hydrates. A common web-only gotcha.
     */
-    <html
-      lang="en"
-      className={`${pixelFont.variable} ${bodyFont.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${pixelFont.variable} ${bodyFont.variable}`} suppressHydrationWarning>
       <body
         /*
           className breakdown:
@@ -192,7 +184,7 @@ export default function RootLayout({
               can be pushed to the bottom with `mt-auto`.
             → In RN, you'd use flex:1 on a View. Same idea, same CSS.
         */
-        className="font-[family-name:var(--font-body)] bg-pokemon-white text-pokemon-black min-h-dvh flex flex-col"
+        className="bg-pokemon-white text-pokemon-black flex min-h-dvh flex-col font-[family-name:var(--font-body)]"
       >
         {/*
           NAVBAR
@@ -235,9 +227,7 @@ export default function RootLayout({
           flex-1: makes this area grow to fill remaining vertical space.
           Same as flex:1 in React Native StyleSheet!
         */}
-        <main className="flex-1 pt-[var(--nav-height)]">
-          {children}
-        </main>
+        <main className="flex-1 pt-[var(--nav-height)]">{children}</main>
 
         {/*
           FOOTER — simple for now
@@ -246,10 +236,10 @@ export default function RootLayout({
           In RN you'd render this inside a ScrollView or at the bottom
           of a screen. On web it just sits at the bottom of the document.
         */}
-        <footer className="border-t border-pokemon-lightgray py-6 mt-8">
-          <div className="max-w-6xl mx-auto px-4 text-center text-sm text-pokemon-gray">
+        <footer className="border-pokemon-lightgray mt-8 border-t py-6">
+          <div className="text-pokemon-gray mx-auto max-w-6xl px-4 text-center text-sm">
             <p>
-              Pokémon Companion — Built with{" "}
+              Pokémon Companion — Built with{' '}
               {/* 
                 ❤️ Next.js note: text nodes with special characters
                 should be wrapped or escaped. The curly brace syntax
@@ -258,7 +248,7 @@ export default function RootLayout({
               Next.js & PokéAPI
             </p>
             <p className="mt-1 text-xs">
-              Data from{" "}
+              Data from{' '}
               {/*
                 <a> tag: the web equivalent of React Native's
                 <Pressable onPress={() => Linking.openURL(url)}>
@@ -278,8 +268,8 @@ export default function RootLayout({
                 className="text-pokemon-blue hover:underline"
               >
                 PokéAPI
-              </a>
-              {" "}— Not affiliated with Nintendo or The Pokémon Company.
+              </a>{' '}
+              — Not affiliated with Nintendo or The Pokémon Company.
             </p>
           </div>
         </footer>

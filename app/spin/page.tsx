@@ -18,13 +18,13 @@
     Client Component:  everything interactive
 */
 
-import { Metadata } from "next";
-import { Suspense } from "react";
-import SpinWheel from "@/components/SpinWheel";
+import {Metadata} from 'next';
+import {Suspense} from 'react';
+import SpinWheel from '@/components/SpinWheel';
 
 export const metadata: Metadata = {
-  title: "Spin the Wheel",
-  description: "Spin the wheel to pick a Pokémon!",
+  title: 'Spin the Wheel',
+  description: 'Spin the wheel to pick a Pokémon!',
 };
 
 export default function SpinPage() {
@@ -34,7 +34,7 @@ export default function SpinPage() {
     something. This one is just a layout wrapper.
   */
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 animate-fade-in">
+    <div className="animate-fade-in mx-auto max-w-2xl px-4 py-8">
       {/*
         max-w-2xl: constrains width to 672px on large screens.
         Narrower than most pages (max-w-6xl) because a wheel
@@ -46,13 +46,11 @@ export default function SpinPage() {
         On web, mx-auto is the standard centering technique.
       */}
 
-      <div className="text-center mb-8">
-        <h1 className="font-[family-name:var(--font-pixel)] text-pokemon-black text-xl md:text-2xl mb-2">
+      <div className="mb-8 text-center">
+        <h1 className="text-pokemon-black mb-2 font-[family-name:var(--font-pixel)] text-xl md:text-2xl">
           Spin the Wheel!
         </h1>
-        <p className="text-pokemon-gray text-sm">
-          Let the wheel decide your next Pokémon adventure.
-        </p>
+        <p className="text-pokemon-gray text-sm">Let the wheel decide your next Pokémon adventure.</p>
       </div>
 
       {/*
@@ -65,11 +63,13 @@ export default function SpinPage() {
 
         rounded-full on the skeleton matches the canvas shape.
       */}
-      <Suspense fallback={
-        <div className="flex justify-center">
-          <div className="w-80 h-80 rounded-full skeleton" />
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div className="flex justify-center">
+            <div className="skeleton h-80 w-80 rounded-full" />
+          </div>
+        }
+      >
         <SpinWheel />
       </Suspense>
     </div>
