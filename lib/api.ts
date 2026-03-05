@@ -86,6 +86,8 @@ import {
   FlavorTextEntry,
 } from '@/types/pokemon';
 
+import pokemonStatsData from '@/lib/data/pokemon-stats.json';
+
 // Base URL for all PokéAPI requests
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
@@ -664,4 +666,52 @@ export function getStatColor(value: number): string {
   if (value < 50) return 'bg-yellow-400';
   if (value < 75) return 'bg-green-400';
   return 'bg-emerald-500';
+}
+
+/**
+ * Get the percentile rank (0–100) of a stat value.
+ *
+ * Uses precomputed breakpoints from lib/data/pokemon-stats.json.
+ * The breakpoints were generated from all base-form Pokémon (is_default=true).
+ *
+ * Algorithm: walk through p10, p20... p100 breakpoints and find
+ * which bucket the value falls into. Linear interpolation gives
+ * a smooth 0–100 value rather than snapping to the nearest 10.
+ *
+ * @param statName  e.g. "hp", "attack", "special-attack"
+ * @param value     The raw base stat value
+ * @returns         0–100 percentile rank
+ */
+export function getStatPercentile(statName: string, value: number): number {
+  const breakpoints =
+    pokemonStatsData.percentileBreakpoints[statName as keyof typeof pokemonStatsData.percentileBreakpoints];
+  if (!breakpoints) return 50; // fallback for unknown stats
+
+  /*
+    Walk through each percentile threshold.
+    If the value is below p10, it's in the 0–10 range.
+    If it's between p10 and p20, interpolate within that band.
+    And so on up to p100.
+  */
+  const thresholds = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
+  for (let i = 0; i < thresholds.length; i++) {
+    const p = thresholds[i];
+    const pKey = `p${p}` as keyof typeof breakpoints;
+    const threshold = breakpoints[pKey];
+
+    if (value <= threshold) {
+      // Interpolate within this band
+      const prevP = i === 0 ? 0 : thresholds[i - 1];
+      const prevKey = i === 0 ? null : (`p${prevP}` as keyof typeof breakpoints);
+      const prevThreshold = prevKey ? breakpoints[prevKey] : 0;
+
+      if (threshold === prevThreshold) return p; // avoid division by zero
+
+      const fraction = (value - prevThreshold) / (threshold - prevThreshold);
+      return Math.round(prevP + fraction * (p - prevP));
+    }
+  }
+
+  return 100; // above p100 threshold
 }

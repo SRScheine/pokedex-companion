@@ -74,7 +74,8 @@ import {
 } from '@/lib/api';
 import {LETS_GO_MAX_POKEMON, TOTAL_POKEMON} from '@/types/pokemon';
 import TypeBadge from '@/components/TypeBadge';
-import StatBar from '@/components/StatBar';
+import StatRadar from '@/components/StatRadar';
+import StatTable from '@/components/StatTable';
 import PokemonDetailClient from '@/components/PokemonDetailClient';
 
 // ============================================================
@@ -297,26 +298,22 @@ export default async function PokemonDetailPage({params}: {params: Promise<{id: 
         Two-column layout on desktop, stacked on mobile.
         Same grid pattern we've used throughout.
       */}
-      <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Base Stats */}
+      <div className="mb-6 flex flex-col gap-6">
+        {/* Base Stats — full width */}
         <div className="card">
           <h2 className="text-pokemon-black mb-4 font-semibold">Base Stats</h2>
-          <div className="flex flex-col gap-3">
-            {pokemon.stats.map((stat) => (
-              <StatBar key={stat.stat.name} stat={stat} />
-            ))}
-          </div>
-          {/* Total */}
-          <div className="border-pokemon-lightgray mt-4 flex items-center gap-3 border-t pt-4">
-            <span className="text-pokemon-gray w-16 flex-shrink-0 text-right text-xs">Total</span>
-            <span className="text-pokemon-black text-sm font-bold">
-              {pokemon.stats.reduce((sum, s) => sum + s.base_stat, 0)}
-            </span>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+            <div className="flex-[4]">
+              <StatRadar stats={pokemon.stats} primaryType={primaryType} />
+            </div>
+            <div className="flex-[2]">
+              <StatTable stats={pokemon.stats} primaryType={primaryType} />
+            </div>
           </div>
         </div>
 
-        {/* Abilities + Details */}
-        <div className="flex flex-col gap-4">
+        {/* Abilities + Training — side by side below */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Abilities */}
           <div className="card">
             <h2 className="text-pokemon-black mb-3 font-semibold">Abilities</h2>
@@ -335,23 +332,14 @@ export default async function PokemonDetailPage({params}: {params: Promise<{id: 
             </div>
           </div>
 
-          {/* Training info */}
+          {/* Training */}
           <div className="card">
             <h2 className="text-pokemon-black mb-3 font-semibold">Training</h2>
             <div className="flex flex-col gap-2 text-sm">
               {[
-                {
-                  label: 'Base Exp',
-                  value: pokemon.base_experience ?? '—',
-                },
-                {
-                  label: 'Growth Rate',
-                  value: species ? formatName(species.growth_rate.name) : '—',
-                },
-                {
-                  label: 'Base Happiness',
-                  value: species?.base_happiness ?? '—',
-                },
+                {label: 'Base Exp', value: pokemon.base_experience ?? '—'},
+                {label: 'Growth Rate', value: species ? formatName(species.growth_rate.name) : '—'},
+                {label: 'Base Happiness', value: species?.base_happiness ?? '—'},
               ].map(({label, value}) => (
                 <div
                   key={label}
