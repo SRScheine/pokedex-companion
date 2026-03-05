@@ -53,6 +53,10 @@ import PokemonCard from '@/components/PokemonCard';
 import PokedexSearch from '@/components/PokedexSearch';
 import Link from 'next/link';
 
+export async function generateStaticParams() {
+  return [{page: '1'}];
+}
+
 export const metadata: Metadata = {
   title: 'Pokédex',
   description: 'Browse all Pokémon available.',
