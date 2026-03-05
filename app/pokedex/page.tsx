@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   description: 'Browse all Pokémon available.',
 };
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 20;
 
 /*
   searchParams type:
