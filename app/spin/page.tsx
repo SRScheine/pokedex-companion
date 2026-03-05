@@ -50,7 +50,7 @@ export default function SpinPage() {
         <h1 className="text-pokemon-black mb-2 font-[family-name:var(--font-pixel)] text-xl md:text-2xl">
           Spin the Wheel!
         </h1>
-        <p className="text-pokemon-gray text-sm">Let the wheel decide your next Pokémon adventure.</p>
+        <p className="text-pokemon-gray pt-1 text-sm">Which Pokémon will choose you?</p>
       </div>
 
       {/*

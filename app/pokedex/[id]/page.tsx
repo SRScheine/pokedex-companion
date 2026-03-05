@@ -30,7 +30,7 @@
   Same concept — the URL segment IS the param.
 
   ============================================================
-  generateStaticParams — PRE-RENDERING ALL 151 PAGES
+  generateStaticParams — PRE-RENDERING ALL POKÉMON PAGES
   ============================================================
 
   This is a Next.js superpower with no RN equivalent.
@@ -39,14 +39,14 @@
   "At build time, generate a static HTML file for each of these
   param combinations."
 
-  Next.js will call this function at build time, get all 151 IDs,
-  and pre-render all 151 detail pages as static HTML files.
+  Next.js will call this function at build time, get all IDs,
+  and pre-render all detail pages as static HTML files.
 
   When a user visits /pokedex/25:
   WITHOUT generateStaticParams: server fetches PokéAPI, renders, responds
   WITH generateStaticParams: Next.js serves a pre-built HTML file instantly
 
-  This makes ALL 151 detail pages load near-instantly. No server
+  This makes ALL detail pages load near-instantly. No server
   processing, no API calls at request time — just serving a file.
   This is called SSG (Static Site Generation).
 
@@ -62,9 +62,9 @@ import {
   getPokemonWithSpecies,
   getEvolutionChain,
   flattenEvolutionChain,
-  formatEvolutionDetails,
   getEnglishFlavorText,
   getLetsGoMoves,
+  getAllMoves,
   capitalize,
   formatPokemonId,
   formatHeight,
@@ -72,9 +72,10 @@ import {
   getSpriteUrl,
   formatName,
 } from '@/lib/api';
-import {LETS_GO_MAX_POKEMON} from '@/types/pokemon';
+import {LETS_GO_MAX_POKEMON, TOTAL_POKEMON} from '@/types/pokemon';
 import TypeBadge from '@/components/TypeBadge';
 import StatBar from '@/components/StatBar';
+import PokemonDetailClient from '@/components/PokemonDetailClient';
 
 // ============================================================
 // generateStaticParams
@@ -82,8 +83,8 @@ import StatBar from '@/components/StatBar';
 // Returns an array of param objects — one per page to generate.
 // ============================================================
 export async function generateStaticParams() {
-  return Array.from({length: LETS_GO_MAX_POKEMON}, (_, i) => ({
-    id: String(i + 1), // "1", "2", "3", ... "151"
+  return Array.from({length: TOTAL_POKEMON}, (_, i) => ({
+    id: String(i + 1), // "1", "2", "3", ... "1025"
   }));
 }
 
@@ -102,7 +103,7 @@ export async function generateMetadata({params}: {params: Promise<{id: string}>}
 
   return {
     title: `${capitalize(pokemon.name)} ${formatPokemonId(pokemon.id)}`,
-    description: `${capitalize(pokemon.name)}'s stats, moves, and evolution chain for Pokémon Let's Go Pikachu.`,
+    description: `${capitalize(pokemon.name)}'s stats, moves, and evolution chain.`,
   };
 }
 
@@ -136,13 +137,25 @@ export default async function PokemonDetailPage({params}: {params: Promise<{id: 
 
   const flavorText = species ? getEnglishFlavorText(species.flavor_text_entries) : '';
 
+  /*
+  Fetch both move sets — the server passes both to PokemonDetailClient.
+  The client component picks which to display based on the Gen 1 toggle.
+  We can't read localStorage here (server-side) so we pass both and
+  let the client decide.
+*/
   const letsGoMoves = getLetsGoMoves(pokemon);
-  const levelUpMoves = letsGoMoves.filter((m) => m.learnMethod === 'level-up');
-  const tmMoves = letsGoMoves.filter((m) => m.learnMethod === 'machine');
+  const allMoves = getAllMoves(pokemon);
+  const letsGoLevelUpMoves = letsGoMoves.filter((m) => m.learnMethod === 'level-up');
+  const letsGoTmMoves = letsGoMoves.filter((m) => m.learnMethod === 'machine');
+  const allLevelUpMoves = allMoves.filter((m) => m.learnMethod === 'level-up');
+  const allTmMoves = allMoves.filter((m) => m.learnMethod === 'machine');
 
-  // Navigation: previous and next Pokémon
+  // Whether this Pokémon is Gen 1 — determines if toggle is shown
+  const isGen1 = pokemon.id <= LETS_GO_MAX_POKEMON;
+
+  // Navigation: previous and next Pokémon — now spans full dex
   const prevId = pokemon.id > 1 ? pokemon.id - 1 : null;
-  const nextId = pokemon.id < LETS_GO_MAX_POKEMON ? pokemon.id + 1 : null;
+  const nextId = pokemon.id < TOTAL_POKEMON ? pokemon.id + 1 : null;
 
   const primaryType = pokemon.types[0].type.name;
 
@@ -353,134 +366,27 @@ export default async function PokemonDetailPage({params}: {params: Promise<{id: 
         </div>
       </div>
 
-      {/* ── EVOLUTION CHAIN ── */}
-      {evolutions.length > 1 && (
-        <div className="card mb-6">
-          <h2 className="text-pokemon-black mb-4 font-semibold">Evolution Chain</h2>
-          {/*
-            overflow-x-auto: horizontal scroll on mobile if the chain is wide.
-            scrollbar-hide: hide the scrollbar visually.
-            This is our horizontal ScrollView pattern again.
-          */}
-          <div className="scrollbar-hide overflow-x-auto">
-            <div className="mx-auto flex min-w-max items-center justify-start gap-2 pb-2 md:justify-center">
-              {evolutions.map((evo, index) => {
-                // Extract ID from the species URL
-                const evoId = parseInt(evo.url.split('/').filter(Boolean).pop() ?? '0');
-                const isCurrentPokemon = evoId === pokemon.id;
+      {/* ── EVOLUTION CHAIN + MOVES ── */}
+      {/*
+          PokemonDetailClient handles both sections.
+          It's a Client Component so it can read localStorage for the
+          Gen 1 toggle state and re-render when the user toggles it.
 
-                // determine the label shown beneath the arrow
-                const evoLabel = index > 0 ? formatEvolutionDetails(evolutions[index].details) : '';
+          We pass both move sets (Gen 1 filtered + all) so the client
+          can switch between them without fetching again.
 
-                return (
-                  <div key={evo.name} className="flex items-center gap-2">
-                    {/* Arrow between evolutions */}
-                    {index > 0 && (
-                      <div className="text-pokemon-gray flex flex-col items-center justify-center self-center px-1">
-                        <span className="text-lg leading-none">→</span>
-                        {evoLabel && (
-                          <span className="text-pokemon-gray max-w-[3.5rem] text-center text-xs break-normal whitespace-normal">
-                            {evoLabel}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Evolution card */}
-                    <Link
-                      href={`/pokedex/${evoId}`}
-                      className={`flex flex-col items-center rounded-xl border-2 p-3 transition-colors ${
-                        isCurrentPokemon
-                          ? 'bg-pokemon-lightgray border-pokemon-red'
-                          : 'hover:bg-pokemon-lightgray border-transparent'
-                      }`}
-                    >
-                      <Image src={getSpriteUrl(evoId)} width={64} height={64} alt={evo.name} unoptimized />
-                      <span className="text-pokemon-black mt-1 text-xs font-medium capitalize">
-                        {capitalize(evo.name)}
-                      </span>
-                      <span className="text-2xs text-pokemon-gray">{formatPokemonId(evoId)}</span>
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── MOVES ── */}
-      <div className="card">
-        <h2 className="text-pokemon-black mb-4 font-semibold">Moves in Let&apos;s Go Pikachu</h2>
-
-        {letsGoMoves.length === 0 ? (
-          <p className="text-pokemon-gray text-sm">No move data available.</p>
-        ) : (
-          <div className="flex flex-col gap-6">
-            {/* Level-up moves */}
-            {levelUpMoves.length > 0 && (
-              <div>
-                <h3 className="text-pokemon-gray mb-3 text-sm font-medium tracking-wide uppercase">By Level Up</h3>
-                {/*
-                  overflow-x-auto for the moves table on mobile.
-                  Tables have a fixed minimum width so they need
-                  to scroll horizontally on small screens rather
-                  than wrapping columns awkwardly.
-                */}
-                <div className="scrollbar-hide overflow-x-auto">
-                  <table className="w-full min-w-[300px] text-sm">
-                    {/*
-                      <table>, <thead>, <tbody>, <tr>, <th>, <td>:
-                      HTML table elements. In RN you'd build a table
-                      layout manually with Views and flexbox.
-                      On web, semantic table elements handle alignment
-                      and accessibility automatically.
-                    */}
-                    <thead>
-                      <tr className="border-pokemon-lightgray border-b">
-                        <th className="text-pokemon-gray w-12 py-2 text-left font-medium">Lv.</th>
-                        <th className="text-pokemon-gray py-2 text-left font-medium">Move</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {levelUpMoves.map((move) => (
-                        <tr
-                          key={move.name}
-                          className="border-pokemon-lightgray/50 hover:bg-pokemon-lightgray/50 border-b transition-colors last:border-0"
-                        >
-                          <td className="text-pokemon-gray py-2 font-mono">{move.level === 0 ? '—' : move.level}</td>
-                          <td className="text-pokemon-black py-2 font-medium capitalize">{formatName(move.name)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* TM moves */}
-            {tmMoves.length > 0 && (
-              <div>
-                <h3 className="text-pokemon-gray mb-3 text-sm font-medium tracking-wide uppercase">By TM</h3>
-                {/*
-                  flex-wrap: moves wrap onto new lines when the container
-                  is too narrow. Like flexWrap: 'wrap' in RN.
-                */}
-                <div className="flex flex-wrap gap-2">
-                  {tmMoves.map((move) => (
-                    <span
-                      key={move.name}
-                      className="bg-pokemon-lightgray text-pokemon-black rounded-full px-3 py-1 text-xs font-medium capitalize"
-                    >
-                      {formatName(move.name)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          The server has already done all the data fetching — the client
+          just decides which subset to display.
+      */}
+      <PokemonDetailClient
+        pokemonId={pokemon.id}
+        evolutions={evolutions}
+        letsGoLevelUpMoves={letsGoLevelUpMoves}
+        letsGoTmMoves={letsGoTmMoves}
+        allLevelUpMoves={allLevelUpMoves}
+        allTmMoves={allTmMoves}
+        isGen1={isGen1}
+      />
     </div>
   );
 }

@@ -48,17 +48,17 @@
 import {Metadata} from 'next';
 import {Suspense} from 'react';
 import {getPokemonListWithDetails, searchPokemon} from '@/lib/api';
-import {LETS_GO_MAX_POKEMON} from '@/types/pokemon';
+import {TOTAL_POKEMON} from '@/types/pokemon';
 import PokemonCard from '@/components/PokemonCard';
 import PokedexSearch from '@/components/PokedexSearch';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Pokédex',
-  description: "Browse all 151 original Pokémon available in Let's Go Pikachu.",
+  description: 'Browse all Pokémon available.',
 };
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 100;
 
 /*
   searchParams type:
@@ -104,7 +104,6 @@ export default async function PokedexPage({searchParams}: PokedexPageProps) {
   const isSearching = !!searchQuery;
 
   if (isSearching) {
-    // Search: filter all 151 by name, then fetch details for matches
     const searchResults = await searchPokemon(searchQuery);
     pokemon = await Promise.all(
       searchResults.map(async (result) => {
@@ -116,9 +115,19 @@ export default async function PokedexPage({searchParams}: PokedexPageProps) {
     );
     totalCount = pokemon.length;
   } else {
-    // Browse: paginated fetch
-    pokemon = await getPokemonListWithDetails(PAGE_SIZE, offset);
-    totalCount = LETS_GO_MAX_POKEMON;
+    /*
+      Clamp the limit on the last page so we never fetch beyond
+      TOTAL_POKEMON. Without this, the last page would spill into
+      special/alternate-form Pokémon that exist in PokéAPI beyond
+      the national dex (e.g. partner pikachu, gigantamax forms).
+  
+      Example: PAGE_SIZE=100, TOTAL_POKEMON=1025, offset=1000
+      Without clamp: fetches 100 → gets IDs 1001-1100 (spills over)
+      With clamp:    fetches 25  → gets IDs 1001-1025 (correct)
+    */
+    const clampedLimit = Math.min(PAGE_SIZE, TOTAL_POKEMON - offset);
+    pokemon = await getPokemonListWithDetails(clampedLimit, offset);
+    totalCount = TOTAL_POKEMON;
   }
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
@@ -132,7 +141,7 @@ export default async function PokedexPage({searchParams}: PokedexPageProps) {
           <p className="text-pokemon-gray mt-1 text-sm">
             {isSearching
               ? `${totalCount} result${totalCount !== 1 ? 's' : ''} for "${searchQuery}"`
-              : `Gen 1 — ${LETS_GO_MAX_POKEMON} Pokémon`}
+              : `${totalCount} Pokémon`}
           </p>
         </div>
 
@@ -301,7 +310,7 @@ export default async function PokedexPage({searchParams}: PokedexPageProps) {
       {/* Page count info */}
       {!isSearching && (
         <p className="text-pokemon-gray mt-4 text-center text-xs">
-          Page {currentPage} of {totalPages} · {LETS_GO_MAX_POKEMON} Pokémon total
+          Page {currentPage} of {totalPages} · {totalCount} Pokémon total
         </p>
       )}
     </div>

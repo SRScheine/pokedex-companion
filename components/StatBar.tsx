@@ -16,15 +16,15 @@ interface StatBarProps {
 
 // Maximum base stat values for each category in Gen 1 Pokémon (1-151)
 // These are the actual recorded maximums found in the generation:
-// HP: 250 (Chansey), Attack: 134 (Dragonite), Defense: 180 (Cloyster),
-// Sp. Atk: 154 (Mewtwo), Sp. Def: 125 (Articuno), Speed: 150 (Electrode)
+// HP: 255 (Blissey), Attack: 181 (Kartana), Defense: 230 (Shukle),
+// Sp. Atk: 173 (Xurkitree), Sp. Def: 230 (Shukle), Speed: 200 (Regieleki)
 const MAX_STATS: Record<string, number> = {
-  hp: 250,
-  attack: 134,
-  defense: 180,
-  'special-attack': 154,
-  'special-defense': 125,
-  speed: 150,
+  hp: 255,
+  attack: 181,
+  defense: 230,
+  'special-attack': 173,
+  'special-defense': 230,
+  speed: 200,
 };
 
 export default function StatBar({stat}: StatBarProps) {

@@ -63,7 +63,8 @@
   React state just tracks the input field's current value.
 */
 
-import {useState} from 'react';
+import {useState, useCallback} from 'react';
+import Image from 'next/image';
 // useRouter: programmatic navigation — like navigation.navigate() in RN
 // but for updating the URL.
 import {useRouter, useSearchParams} from 'next/navigation';
@@ -89,6 +90,8 @@ export default function PokedexSearch() {
     This syncs the UI with the URL on first render.
   */
   const [query, setQuery] = useState(searchParams.get('search') ?? '');
+  const [suggestions, setSuggestions] = useState<Array<{id: number; name: string}>>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   function handleSearch(e: React.FormEvent) {
     /*
@@ -102,6 +105,7 @@ export default function PokedexSearch() {
       On web: you'll call this constantly on form submissions.
     */
     e.preventDefault();
+    setSuggestions([]);
 
     /*
       URLSearchParams: a browser API for building query strings.
@@ -136,8 +140,43 @@ export default function PokedexSearch() {
 
   function handleClear() {
     setQuery('');
+    setSuggestions([]);
     router.push('/pokedex');
   }
+
+  /*
+  fetchSuggestions: fetches live search results as the user types.
+  useCallback memoizes this function so it doesn't get recreated
+  on every render — same pattern as in SpinWheel's search.
+
+  This runs client-side: fetches all 1025 names, filters in memory.
+  The response is cached by Next.js after the first call so
+  subsequent keystrokes are instant.
+*/
+  const fetchSuggestions = useCallback(async (value: string) => {
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025');
+      const data = await res.json();
+      const lower = value.toLowerCase().trim();
+      const matches = data.results
+        .filter((p: {name: string}) => p.name.includes(lower))
+        .slice(0, 8)
+        .map((p: {name: string; url: string}) => ({
+          name: p.name,
+          id: parseInt(p.url.split('/').filter(Boolean).pop() ?? '0'),
+        }));
+      setSuggestions(matches);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
   return (
     /*
@@ -186,7 +225,10 @@ export default function PokedexSearch() {
         <input
           type="search"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            fetchSuggestions(e.target.value);
+          }}
           placeholder="Search Pokémon..."
           className="border-pokemon-lightgray focus:ring-pokemon-red text-pokemon-black placeholder:text-pokemon-gray w-full rounded-full border bg-white py-2.5 pr-10 pl-10 text-sm focus:ring-2 focus:outline-none"
           /*
@@ -210,6 +252,69 @@ export default function PokedexSearch() {
           </button>
         )}
       </div>
+      {/* Live suggestions dropdown */}
+      {/*
+          absolute top-full: positions the dropdown directly below the input.
+          top-full = top edge sits at the bottom edge of the parent.
+          left-0 right-0: stretches to match the input width exactly.
+          z-50: above all other page content.
+
+          In RN: you'd use a Modal or absolute View positioned manually.
+          On web: absolute + top-full is the standard dropdown pattern.
+      */}
+      {suggestions.length > 0 && (
+        <div className="border-pokemon-lightgray absolute top-full right-0 left-0 z-50 mt-2 overflow-hidden rounded-2xl border bg-white shadow-lg">
+          {isSearching && (
+            <div className="text-pokemon-gray flex items-center gap-2 px-4 py-3 text-sm">
+              {/*
+                  CSS spinner — same pattern as SpinWheel.
+                  border-t-transparent creates the "gap" in the circle.
+                  animate-spin: Tailwind's built-in continuous rotation.
+                  In RN: <ActivityIndicator />
+              */}
+              <div className="border-pokemon-red h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+              Searching...
+            </div>
+          )}
+          {suggestions.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => {
+                /*
+                  On suggestion click: update the input, clear the dropdown,
+                  and navigate to the search results page for that name.
+                  Using router.push keeps this client-side (no full reload).
+                */
+                setQuery(s.name);
+                setSuggestions([]);
+                router.push(`/pokedex?search=${s.name}`);
+              }}
+              className="border-pokemon-lightgray hover:bg-pokemon-lightgray flex w-full items-center gap-3 border-b px-4 py-2.5 text-left transition-colors last:border-0"
+            >
+              <Image
+                src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${s.id}.png`}
+                width={32}
+                height={32}
+                alt={s.name}
+                unoptimized
+              />
+              {/*
+                  flex-1: makes the name column take all remaining space,
+                  pushing the ID number to the right edge.
+                  In RN: flex: 1 on a View — same concept.
+              */}
+              <span className="text-pokemon-black flex-1 text-sm font-medium capitalize">
+                {s.name
+                  .split('-')
+                  .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+                  .join(' ')}
+              </span>
+              <span className="text-pokemon-gray text-xs">#{String(s.id).padStart(3, '0')}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </form>
   );
 }

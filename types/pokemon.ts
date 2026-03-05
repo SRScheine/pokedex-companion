@@ -439,3 +439,5 @@ export const LETS_GO_VERSION = 'lets-go-pikachu';
  * (Plus Meltan #808 and Melmetal #809, but we'll keep it simple)
  */
 export const LETS_GO_MAX_POKEMON = 151;
+
+export const TOTAL_POKEMON = 1025;

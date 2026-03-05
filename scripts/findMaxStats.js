@@ -32,9 +32,9 @@ async function findMaxStats() {
     speed: {pokemon: '', value: 0},
   };
 
-  console.log('Fetching stats for all 151 Gen 1 Pokémon...\n');
+  console.log('Fetching stats for all Pokémon...\n');
 
-  for (let i = 1; i <= 151; i++) {
+  for (let i = 1; i <= 1025; i++) {
     try {
       const pokemon = await fetchPokemon(i);
 
@@ -52,8 +52,8 @@ async function findMaxStats() {
         }
       });
 
-      if (i % 20 === 0) {
-        process.stdout.write(`\rProcessed ${i}/151...`);
+      if (i % 50 === 0) {
+        process.stdout.write(`\rProcessed ${i}/1025...`);
       }
     } catch (error) {
       console.error(`Error fetching Pokemon ${i}:`, error.message);
@@ -61,7 +61,7 @@ async function findMaxStats() {
   }
 
   console.log('\n\n═════════════════════════════════════════');
-  console.log('MAX STATS FOR GEN 1 POKÉMON (1-151)');
+  console.log('MAX STATS FOR ALL POKÉMON (1-1025)');
   console.log('═════════════════════════════════════════\n');
 
   const statNameMap = {

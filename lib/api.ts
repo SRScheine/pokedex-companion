@@ -81,9 +81,8 @@ import {
   EvolutionDetail,
   PokemonTypeData,
   Move,
-  LETS_GO_MAX_POKEMON,
+  TOTAL_POKEMON,
   LETS_GO_VERSION_GROUP,
-  LETS_GO_VERSION,
   FlavorTextEntry,
 } from '@/types/pokemon';
 
@@ -147,16 +146,11 @@ async function apiFetch<T>(endpoint: string, options: {cache?: RequestCache; rev
 /**
  * Fetch a paginated list of Pokémon.
  *
- * We limit to LETS_GO_MAX_POKEMON (151) since that's what's
- * in Let's Go Pikachu. The offset parameter enables pagination.
- *
- * @param limit  How many to fetch (max 151 for our app)
+ * @param limit  How many to fetch
  * @param offset How many to skip (for pagination)
  */
-export async function getPokemonList(limit: number = 20, offset: number = 0): Promise<PokemonListResponse> {
-  // Clamp limit so we never fetch beyond Gen 1
-  const clampedLimit = Math.min(limit, LETS_GO_MAX_POKEMON - offset);
-  return apiFetch<PokemonListResponse>(`/pokemon?limit=${clampedLimit}&offset=${offset}`);
+export async function getPokemonList(limit: number = 100, offset: number = 0): Promise<PokemonListResponse> {
+  return apiFetch<PokemonListResponse>(`/pokemon?limit=${limit}&offset=${offset}`);
 }
 
 /**
@@ -173,7 +167,7 @@ export async function getPokemonList(limit: number = 20, offset: number = 0): Pr
  * @param limit  Number of Pokémon per page
  * @param offset Starting offset for pagination
  */
-export async function getPokemonListWithDetails(limit: number = 20, offset: number = 0): Promise<Pokemon[]> {
+export async function getPokemonListWithDetails(limit: number = 100, offset: number = 0): Promise<Pokemon[]> {
   const listData = await getPokemonList(limit, offset);
 
   /*
@@ -266,26 +260,15 @@ export async function getPokemonWithSpecies(
 
 /**
  * Get the English Pokédex flavor text for a Pokémon,
- * preferring Let's Go Pikachu version if available.
- *
- * PokéAPI returns flavor text for EVERY game and EVERY language.
- * We filter to just the English Let's Go entry. If that doesn't
- * exist, we fall back to any English entry.
+ * preferring newer games.
  *
  * The flavor text from PokéAPI has weird escaped whitespace
  * characters (\f, \n) that we clean up before displaying.
  */
 export function getEnglishFlavorText(entries: FlavorTextEntry[]): string {
-  // Try to find Let's Go Pikachu specifically
-  const letsGoEntry = entries.find((entry) => entry.language.name === 'en' && entry.version.name === LETS_GO_VERSION);
-
-  if (letsGoEntry) {
-    return cleanFlavorText(letsGoEntry.flavor_text);
-  }
-
-  // Fall back to any English entry
-  const englishEntry = entries.find((entry) => entry.language.name === 'en');
-
+  // Prefer newer games for more relevant descriptions,
+  // fall back to any English entry if needed
+  const englishEntry = entries.filter((entry) => entry.language.name === 'en').pop(); // last entry tends to be most recent game
   return englishEntry ? cleanFlavorText(englishEntry.flavor_text) : '';
 }
 
@@ -393,19 +376,13 @@ export function flattenEvolutionChain(chain: EvolutionChain['chain']): FlatEvolu
 
   // Recursive helper
   function traverse(link: EvolutionChain['chain']) {
-    // Extract ID from the species URL and only include if it's in Let's Go
-    const evoId = parseInt(link.species.url.split('/').filter(Boolean).pop() ?? '0');
+    result.push({
+      name: link.species.name,
+      url: link.species.url,
+      minLevel: link.evolution_details[0]?.min_level ?? null,
+      details: link.evolution_details,
+    });
 
-    if (evoId <= LETS_GO_MAX_POKEMON) {
-      result.push({
-        name: link.species.name,
-        url: link.species.url,
-        minLevel: link.evolution_details[0]?.min_level ?? null,
-        details: link.evolution_details,
-      });
-    }
-
-    // Recurse into each evolution
     link.evolves_to.forEach(traverse);
   }
 
@@ -542,6 +519,41 @@ export function getLetsGoMoves(
   });
 }
 
+/**
+ * Get ALL moves for a Pokémon across every game.
+ * Used on the detail page when the Gen 1 Only toggle is off.
+ * Deduplicates by move name since a move can appear in many versions.
+ */
+export function getAllMoves(pokemon: Pokemon): Array<{name: string; url: string; learnMethod: string; level: number}> {
+  const seen = new Set<string>();
+  const allMoves: Array<{name: string; url: string; learnMethod: string; level: number}> = [];
+
+  for (const moveEntry of pokemon.moves) {
+    if (seen.has(moveEntry.move.name)) continue;
+    seen.add(moveEntry.move.name);
+
+    // Use the first version group detail we find for learn method + level
+    const detail = moveEntry.version_group_details[0];
+    if (!detail) continue;
+
+    allMoves.push({
+      name: moveEntry.move.name,
+      url: moveEntry.move.url,
+      learnMethod: detail.move_learn_method.name,
+      level: detail.level_learned_at,
+    });
+  }
+
+  return allMoves.sort((a, b) => {
+    if (a.learnMethod === 'level-up' && b.learnMethod !== 'level-up') return -1;
+    if (a.learnMethod !== 'level-up' && b.learnMethod === 'level-up') return 1;
+    if (a.learnMethod === 'level-up' && b.learnMethod === 'level-up') {
+      return a.level - b.level;
+    }
+    return a.name.localeCompare(b.name);
+  });
+}
+
 /* ============================================================
    SEARCH FUNCTION
    ============================================================ */
@@ -562,8 +574,8 @@ export function getLetsGoMoves(
 export async function searchPokemon(query: string): Promise<Array<{name: string; id: number; url: string}>> {
   if (!query.trim()) return [];
 
-  // Fetch all 151 Pokémon names (cached after first call)
-  const allPokemon = await apiFetch<PokemonListResponse>(`/pokemon?limit=${LETS_GO_MAX_POKEMON}&offset=0`);
+  // Fetch all Pokémon names (cached after first call)
+  const allPokemon = await apiFetch<PokemonListResponse>(`/pokemon?limit=${TOTAL_POKEMON}&offset=0`);
 
   const lowerQuery = query.toLowerCase().trim();
 

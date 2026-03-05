@@ -356,6 +356,7 @@ export default function SpinWheel() {
   const [searchResults, setSearchResults] = useState<Array<{id: number; name: string}>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false);
 
   /*
     useRef for values that should NOT trigger re-renders when changed.
@@ -441,6 +442,7 @@ export default function SpinWheel() {
 
   // Add a random Pokémon from the full national dex (1-1025)
   async function addRandom() {
+    setIsLoadingRandom(true);
     const ids = new Set<number>();
     while (ids.size < MAX_SLOTS) {
       ids.add(Math.floor(Math.random() * 1025) + 1);
@@ -449,6 +451,7 @@ export default function SpinWheel() {
     const valid = results.filter(Boolean) as WheelPokemon[];
     setPokemon(valid);
     valid.forEach(loadSprite);
+    setIsLoadingRandom(false);
   }
 
   /*
@@ -590,17 +593,17 @@ export default function SpinWheel() {
       <div className="flex w-full flex-wrap justify-center gap-2">
         <button
           onClick={loadBensFavorites}
-          disabled={isLoadingFavorites || isSpinning}
+          disabled={isLoadingFavorites || isSpinning || isLoadingRandom}
           className="bg-pokemon-yellow text-pokemon-black flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold shadow-md transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoadingFavorites ? 'Loading...' : "⭐ Ben's Favorites"}
         </button>
         <button
           onClick={addRandom}
-          disabled={isSpinning}
+          disabled={isLoadingRandom || isSpinning}
           className="bg-pokemon-blue flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          🎲 Random
+          {isLoadingRandom ? 'Adding...' : '🎲 Random'}
         </button>
       </div>
 
