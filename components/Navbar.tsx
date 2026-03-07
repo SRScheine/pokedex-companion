@@ -86,7 +86,7 @@ interface NavLink {
 // folder names in the app/ directory (file-based routing).
 const NAV_LINKS: NavLink[] = [
   {href: '/pokedex', label: 'Pokédex', emoji: '📖'},
-  {href: '/type-chart', label: 'Type Chart', emoji: '⚔️'},
+  {href: '/type', label: 'Type Chart', emoji: '⚔️'},
   {href: '/team', label: 'My Team', emoji: '⭐'},
   {href: '/spin', label: 'Spin!', emoji: '🎡'},
 ];

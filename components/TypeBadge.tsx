@@ -81,14 +81,35 @@ const TYPE_TEXT_COLORS: Partial<Record<PokemonTypeName, string>> = {
   normal: 'text-pokemon-black', // Gray → dark text
 };
 
+const TYPE_ABBREV: Record<string, string> = {
+  normal: 'Nor',
+  fire: 'Fir',
+  water: 'Wat',
+  electric: 'Ele',
+  grass: 'Gra',
+  ice: 'Ice',
+  fighting: 'Fig',
+  poison: 'Poi',
+  ground: 'Gro',
+  flying: 'Fly',
+  psychic: 'Psy',
+  bug: 'Bug',
+  rock: 'Roc',
+  ghost: 'Gho',
+  dragon: 'Dra',
+  dark: 'Dar',
+  steel: 'Ste',
+  fairy: 'Fai',
+};
+
 // ============================================================
 // PROPS INTERFACE
 // ============================================================
 interface TypeBadgeProps {
-  typeName: string; // The type name from PokéAPI ("fire", "water", etc.)
-  size?: 'sm' | 'md' | 'lg'; // Controls badge size
-  className?: string; // Allow parent to add extra classes
-  // In RN: style prop for style overrides
+  typeName: string;
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  useAbbrev?: boolean; // Show 3-char abbreviation instead of full type name
 }
 
 // Size variants — maps size prop to Tailwind classes
@@ -101,7 +122,7 @@ const SIZE_CLASSES = {
 // ============================================================
 // COMPONENT
 // ============================================================
-export default function TypeBadge({typeName, size = 'md', className = ''}: TypeBadgeProps) {
+export default function TypeBadge({typeName, size = 'md', className = '', useAbbrev = false}: TypeBadgeProps) {
   /*
     Type safety: cast to PokemonTypeName for the color lookup.
     If the API sends an unknown type, we fall back to a gray color.
@@ -134,6 +155,8 @@ export default function TypeBadge({typeName, size = 'md', className = ''}: TypeB
         letter-spacing: 0.05em
         color: white (overridden by textColor below)
     */
-    <span className={`badge ${bgColor} ${textColor} ${sizeClass} ${className}`}>{typeName}</span>
+    <span className={`badge ${bgColor} ${textColor} ${sizeClass} ${className}`}>
+      {useAbbrev ? (TYPE_ABBREV[typeName] ?? typeName) : typeName}
+    </span>
   );
 }
