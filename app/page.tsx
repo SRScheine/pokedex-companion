@@ -149,7 +149,7 @@ export default async function HomePage() {
                   Open Pokédex →
                 </Link>
                 <Link
-                  href="/type-chart"
+                  href="/type"
                   className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/20 px-6 py-3 text-sm font-bold text-white transition-colors duration-200 hover:bg-white/30"
                 >
                   ⚔️ Type Chart

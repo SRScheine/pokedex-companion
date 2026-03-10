@@ -77,6 +77,7 @@ import TypeBadge from '@/components/TypeBadge';
 import StatRadar from '@/components/StatRadar';
 import StatTable from '@/components/StatTable';
 import PokemonDetailClient from '@/components/PokemonDetailClient';
+import TypeDefenses from '@/components/TypeDefenses';
 
 // ============================================================
 // generateStaticParams
@@ -311,6 +312,8 @@ export default async function PokemonDetailPage({params}: {params: Promise<{id: 
             </div>
           </div>
         </div>
+
+        <TypeDefenses pokemonTypes={pokemon.types.map(({type}) => type.name)} name={capitalize(pokemon.name)} />
 
         {/* Abilities + Training — side by side below */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
