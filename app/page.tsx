@@ -82,7 +82,7 @@ const QUICK_LINKS = [
     color: 'bg-pokemon-red',
   },
   {
-    href: '/type-chart',
+    href: '/type',
     emoji: '⚔️',
     title: 'Type Chart',
     description: 'Check type matchups mid-battle. Know your weaknesses before they do.',

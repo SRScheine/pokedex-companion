@@ -325,6 +325,7 @@ export function formatEvolutionDetails(details: EvolutionDetail[]): string {
       if (d.min_happiness) return `Happiness ≥ ${d.min_happiness}`;
       if (d.time_of_day) return capitalize(d.time_of_day);
       if (d.location) return capitalize(d.location.name);
+      if (d.known_move) return `After ${humanize(d.known_move.name)} learned`;
       break;
     case 'use-item':
       if (d.item) return humanize(d.item.name); // full name, e.g. "Thunder Stone"
