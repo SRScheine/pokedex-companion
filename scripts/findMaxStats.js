@@ -7,13 +7,13 @@
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
-async function fetchPokemon(id) {
+const fetchPokemon = async (id) => {
   const response = await fetch(`${BASE_URL}/pokemon/${id}`);
   if (!response.ok) throw new Error(`Failed to fetch Pokemon ${id}`);
   return response.json();
-}
+};
 
-async function findMaxStats() {
+const findMaxStats = async () => {
   const statsMap = {
     hp: 0,
     attack: 0,
@@ -90,6 +90,6 @@ async function findMaxStats() {
   });
   console.log('};');
   console.log();
-}
+};
 
 findMaxStats().catch(console.error);

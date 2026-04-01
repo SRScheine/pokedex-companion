@@ -40,7 +40,7 @@ interface Props {
   isGen1: boolean;
 }
 
-export default function PokemonDetailClient({
+const PokemonDetailClient = ({
   pokemonId,
   evolutions,
   letsGoLevelUpMoves,
@@ -48,7 +48,7 @@ export default function PokemonDetailClient({
   allLevelUpMoves,
   allTmMoves,
   isGen1,
-}: Props) {
+}: Props) => {
   /*
     useGen1Only: reads localStorage, provides toggle state + function.
     One hook instance here controls BOTH the evolution and moves sections
@@ -208,4 +208,6 @@ export default function PokemonDetailClient({
       </div>
     </>
   );
-}
+};
+
+export default PokemonDetailClient;

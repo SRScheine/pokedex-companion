@@ -17,7 +17,7 @@ interface PokemonCardProps {
   pokemon: Pokemon;
 }
 
-export default function PokemonCard({pokemon}: PokemonCardProps) {
+const PokemonCard = ({pokemon}: PokemonCardProps) => {
   /*
     Type color for the card background:
     We tint the card with the Pokémon's primary type color at low opacity.
@@ -87,4 +87,6 @@ export default function PokemonCard({pokemon}: PokemonCardProps) {
       </div>
     </Link>
   );
-}
+};
+
+export default PokemonCard;

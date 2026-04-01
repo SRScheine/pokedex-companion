@@ -113,7 +113,7 @@ const BASE_URL = 'https://pokeapi.co/api/v2';
  *
  * TypeScript generics work identically in RN and web.
  */
-async function apiFetch<T>(endpoint: string, options: {cache?: RequestCache; revalidate?: number} = {}): Promise<T> {
+const apiFetch = async <T>(endpoint: string, options: {cache?: RequestCache; revalidate?: number} = {}): Promise<T> => {
   const url = endpoint.startsWith('http')
     ? endpoint // Full URL (for when PokéAPI gives us a URL directly)
     : `${BASE_URL}${endpoint}`; // Relative endpoint
@@ -139,7 +139,30 @@ async function apiFetch<T>(endpoint: string, options: {cache?: RequestCache; rev
   }
 
   return response.json() as Promise<T>;
-}
+};
+
+/**
+ * Clean up PokéAPI flavor text.
+ * The API returns text with form feed (\f) and newline (\n)
+ * characters used for line breaks in the game's text box.
+ * We replace them with spaces for web display.
+ */
+const cleanFlavorText = (text: string): string => {
+  return text
+    .replace(/\f/g, ' ') // form feed → space
+    .replace(/\n/g, ' ') // newline → space
+    .replace(/\s+/g, ' ') // multiple spaces → single space
+    .trim();
+};
+
+/**
+ * Capitalize the first letter of a string.
+ * PokéAPI returns all names in lowercase ("pikachu" → "Pikachu")
+ */
+export const capitalize = (str: string): string => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 /* ============================================================
    POKÉMON LIST FUNCTIONS
@@ -151,9 +174,9 @@ async function apiFetch<T>(endpoint: string, options: {cache?: RequestCache; rev
  * @param limit  How many to fetch
  * @param offset How many to skip (for pagination)
  */
-export async function getPokemonList(limit: number = 100, offset: number = 0): Promise<PokemonListResponse> {
+export const getPokemonList = async (limit: number = 100, offset: number = 0): Promise<PokemonListResponse> => {
   return apiFetch<PokemonListResponse>(`/pokemon?limit=${limit}&offset=${offset}`);
-}
+};
 
 /**
  * Fetch a page of Pokémon WITH their full details.
@@ -169,7 +192,7 @@ export async function getPokemonList(limit: number = 100, offset: number = 0): P
  * @param limit  Number of Pokémon per page
  * @param offset Starting offset for pagination
  */
-export async function getPokemonListWithDetails(limit: number = 100, offset: number = 0): Promise<Pokemon[]> {
+export const getPokemonListWithDetails = async (limit: number = 100, offset: number = 0): Promise<Pokemon[]> => {
   const listData = await getPokemonList(limit, offset);
 
   /*
@@ -196,7 +219,7 @@ export async function getPokemonListWithDetails(limit: number = 100, offset: num
   const pokemonDetails = await Promise.all(listData.results.map((item) => apiFetch<Pokemon>(item.url)));
 
   return pokemonDetails;
-}
+};
 
 /* ============================================================
    INDIVIDUAL POKÉMON FUNCTIONS
@@ -210,7 +233,7 @@ export async function getPokemonListWithDetails(limit: number = 100, offset: num
  *
  * @param idOrName  National Dex number (25) or name ("pikachu")
  */
-export async function getPokemon(idOrName: string | number): Promise<Pokemon | null> {
+export const getPokemon = async (idOrName: string | number): Promise<Pokemon | null> => {
   try {
     return await apiFetch<Pokemon>(`/pokemon/${idOrName}`);
   } catch (error) {
@@ -220,7 +243,7 @@ export async function getPokemon(idOrName: string | number): Promise<Pokemon | n
     }
     throw error;
   }
-}
+};
 
 /**
  * Fetch species data for a Pokémon.
@@ -231,7 +254,7 @@ export async function getPokemon(idOrName: string | number): Promise<Pokemon | n
  *
  * @param idOrName  National Dex number or name
  */
-export async function getPokemonSpecies(idOrName: string | number): Promise<PokemonSpecies | null> {
+export const getPokemonSpecies = async (idOrName: string | number): Promise<PokemonSpecies | null> => {
   try {
     return await apiFetch<PokemonSpecies>(`/pokemon-species/${idOrName}`);
   } catch (error) {
@@ -240,7 +263,7 @@ export async function getPokemonSpecies(idOrName: string | number): Promise<Poke
     }
     throw error;
   }
-}
+};
 
 /**
  * Fetch both Pokémon and species data in parallel.
@@ -249,16 +272,16 @@ export async function getPokemonSpecies(idOrName: string | number): Promise<Poke
  * Returns a typed tuple — TypeScript knows index 0 is Pokemon | null
  * and index 1 is PokemonSpecies | null.
  */
-export async function getPokemonWithSpecies(
+export const getPokemonWithSpecies = async (
   idOrName: string | number
-): Promise<[Pokemon | null, PokemonSpecies | null]> {
+): Promise<[Pokemon | null, PokemonSpecies | null]> => {
   /*
     Promise.all with different return types:
     TypeScript infers the tuple type automatically here.
     This is one of the nicest TypeScript + async patterns.
   */
   return Promise.all([getPokemon(idOrName), getPokemonSpecies(idOrName)]);
-}
+};
 
 /**
  * Get the English Pokédex flavor text for a Pokémon,
@@ -267,26 +290,12 @@ export async function getPokemonWithSpecies(
  * The flavor text from PokéAPI has weird escaped whitespace
  * characters (\f, \n) that we clean up before displaying.
  */
-export function getEnglishFlavorText(entries: FlavorTextEntry[]): string {
+export const getEnglishFlavorText = (entries: FlavorTextEntry[]): string => {
   // Prefer newer games for more relevant descriptions,
   // fall back to any English entry if needed
   const englishEntry = entries.filter((entry) => entry.language.name === 'en').pop(); // last entry tends to be most recent game
   return englishEntry ? cleanFlavorText(englishEntry.flavor_text) : '';
-}
-
-/**
- * Clean up PokéAPI flavor text.
- * The API returns text with form feed (\f) and newline (\n)
- * characters used for line breaks in the game's text box.
- * We replace them with spaces for web display.
- */
-function cleanFlavorText(text: string): string {
-  return text
-    .replace(/\f/g, ' ') // form feed → space
-    .replace(/\n/g, ' ') // newline → space
-    .replace(/\s+/g, ' ') // multiple spaces → single space
-    .trim();
-}
+};
 
 /* ============================================================
    EVOLUTION CHAIN FUNCTIONS
@@ -300,9 +309,9 @@ function cleanFlavorText(text: string): string {
  *
  * @param evolutionChainUrl  The URL from species.evolution_chain.url
  */
-export async function getEvolutionChain(evolutionChainUrl: string): Promise<EvolutionChain> {
+export const getEvolutionChain = async (evolutionChainUrl: string): Promise<EvolutionChain> => {
   return apiFetch<EvolutionChain>(evolutionChainUrl);
-}
+};
 
 /**
  * Turn a set of evolution details into a human-readable label. We try
@@ -313,7 +322,7 @@ export async function getEvolutionChain(evolutionChainUrl: string): Promise<Evol
  * condition (item, level, happiness, trade, etc.). In our UI we only
  * need a short phrase such as "Lv. 16", "Thunder Stone" or "Trade".
  */
-export function formatEvolutionDetails(details: EvolutionDetail[]): string {
+export const formatEvolutionDetails = (details: EvolutionDetail[]): string => {
   if (!details || details.length === 0) return '';
   const d = details[0]; // most chains only have one entry
 
@@ -339,7 +348,7 @@ export function formatEvolutionDetails(details: EvolutionDetail[]): string {
 
   // fallback
   return humanize(d.trigger.name);
-}
+};
 
 /**
  * Helper: extract a flat array of Pokémon names from an evolution chain.
@@ -374,11 +383,10 @@ export interface FlatEvolution {
   details: EvolutionDetail[];
 }
 
-export function flattenEvolutionChain(chain: EvolutionChain['chain']): FlatEvolution[] {
+export const flattenEvolutionChain = (chain: EvolutionChain['chain']): FlatEvolution[] => {
   const result: FlatEvolution[] = [];
 
-  // Recursive helper
-  function traverse(link: EvolutionChain['chain']) {
+  const traverse = (link: EvolutionChain['chain']) => {
     result.push({
       name: link.species.name,
       url: link.species.url,
@@ -387,11 +395,11 @@ export function flattenEvolutionChain(chain: EvolutionChain['chain']): FlatEvolu
     });
 
     link.evolves_to.forEach(traverse);
-  }
+  };
 
   traverse(chain);
   return result;
-}
+};
 
 /* ============================================================
    TYPE FUNCTIONS
@@ -403,9 +411,9 @@ export function flattenEvolutionChain(chain: EvolutionChain['chain']): FlatEvolu
  *
  * @param typeName  e.g. "fire", "water", "psychic"
  */
-export async function getTypeData(typeName: string): Promise<PokemonTypeData> {
+export const getTypeData = async (typeName: string): Promise<PokemonTypeData> => {
   return apiFetch<PokemonTypeData>(`/type/${typeName}`);
-}
+};
 
 /**
  * Fetch damage relations for multiple types at once.
@@ -414,9 +422,9 @@ export async function getTypeData(typeName: string): Promise<PokemonTypeData> {
  *
  * @param typeNames  Array of type names ["fire", "flying"]
  */
-export async function getMultipleTypeData(typeNames: string[]): Promise<PokemonTypeData[]> {
+export const getMultipleTypeData = async (typeNames: string[]): Promise<PokemonTypeData[]> => {
   return Promise.all(typeNames.map(getTypeData));
-}
+};
 
 /**
  * Calculate the combined type effectiveness for a Pokémon
@@ -430,7 +438,7 @@ export async function getMultipleTypeData(typeNames: string[]): Promise<PokemonT
  *   - 0.5x from each type that resists = 0.25x total
  *   - 0x from any immunity = 0x total (immune)
  */
-export function calculateTypeEffectiveness(typeDataList: PokemonTypeData[]): Record<string, number> {
+export const calculateTypeEffectiveness = (typeDataList: PokemonTypeData[]): Record<string, number> => {
   // Start with all types doing 1x damage
   const effectiveness: Record<string, number> = {};
 
@@ -454,7 +462,7 @@ export function calculateTypeEffectiveness(typeDataList: PokemonTypeData[]): Rec
   }
 
   return effectiveness;
-}
+};
 
 /* ============================================================
    MOVE FUNCTIONS
@@ -465,7 +473,7 @@ export function calculateTypeEffectiveness(typeDataList: PokemonTypeData[]): Rec
  *
  * @param nameOrId  e.g. "thunderbolt" or 85
  */
-export async function getMove(nameOrId: string | number): Promise<Move | null> {
+export const getMove = async (nameOrId: string | number): Promise<Move | null> => {
   try {
     return await apiFetch<Move>(`/move/${nameOrId}`);
   } catch (error) {
@@ -474,7 +482,7 @@ export async function getMove(nameOrId: string | number): Promise<Move | null> {
     }
     throw error;
   }
-}
+};
 
 /**
  * Get moves for a Pokémon filtered to Let's Go Pikachu.
@@ -485,9 +493,9 @@ export async function getMove(nameOrId: string | number): Promise<Move | null> {
  * Returns a sorted list: level-up moves first (sorted by level),
  * then TM moves.
  */
-export function getLetsGoMoves(
+export const getLetsGoMoves = (
   pokemon: Pokemon
-): Array<{name: string; url: string; learnMethod: string; level: number}> {
+): Array<{name: string; url: string; learnMethod: string; level: number}> => {
   const letsGoMoves: Array<{
     name: string;
     url: string;
@@ -520,14 +528,16 @@ export function getLetsGoMoves(
     }
     return a.name.localeCompare(b.name);
   });
-}
+};
 
 /**
  * Get ALL moves for a Pokémon across every game.
  * Used on the detail page when the Gen 1 Only toggle is off.
  * Deduplicates by move name since a move can appear in many versions.
  */
-export function getAllMoves(pokemon: Pokemon): Array<{name: string; url: string; learnMethod: string; level: number}> {
+export const getAllMoves = (
+  pokemon: Pokemon
+): Array<{name: string; url: string; learnMethod: string; level: number}> => {
   const seen = new Set<string>();
   const allMoves: Array<{name: string; url: string; learnMethod: string; level: number}> = [];
 
@@ -555,7 +565,7 @@ export function getAllMoves(pokemon: Pokemon): Array<{name: string; url: string;
     }
     return a.name.localeCompare(b.name);
   });
-}
+};
 
 /* ============================================================
    SEARCH FUNCTION
@@ -574,7 +584,7 @@ export function getAllMoves(pokemon: Pokemon): Array<{name: string; url: string;
  *
  * @param query  Search string (case-insensitive partial match)
  */
-export async function searchPokemon(query: string): Promise<Array<{name: string; id: number; url: string}>> {
+export const searchPokemon = async (query: string): Promise<Array<{name: string; id: number; url: string}>> => {
   if (!query.trim()) return [];
 
   // Fetch all Pokémon names (cached after first call)
@@ -590,7 +600,7 @@ export async function searchPokemon(query: string): Promise<Array<{name: string;
       // Extract the ID from the URL: ".../pokemon/25/" → 25
       id: parseInt(p.url.split('/').filter(Boolean).pop() ?? '0'),
     }));
-}
+};
 
 /* ============================================================
    UTILITY HELPERS
@@ -602,27 +612,18 @@ export async function searchPokemon(query: string): Promise<Array<{name: string;
  *
  * String.padStart is standard JavaScript — same in RN and web.
  */
-export function formatPokemonId(id: number): string {
+export const formatPokemonId = (id: number): string => {
   return `#${String(id).padStart(3, '0')}`;
-}
-
-/**
- * Capitalize the first letter of a string.
- * PokéAPI returns all names in lowercase ("pikachu" → "Pikachu")
- */
-export function capitalize(str: string): string {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+};
 
 /**
  * Format a hyphenated API name for display.
  * "special-attack" → "Special Attack"
  * "lets-go-pikachu" → "Lets Go Pikachu"
  */
-export function formatName(str: string): string {
+export const formatName = (str: string): string => {
   return str.split('-').map(capitalize).join(' ');
-}
+};
 
 /**
  * Get the sprite URL for a Pokémon by ID.
@@ -632,42 +633,42 @@ export function formatName(str: string): string {
  * Useful for lists where we want to show images without
  * fetching full Pokémon data.
  */
-export function getSpriteUrl(id: number, type: 'sprite' | 'artwork' = 'sprite'): string {
+export const getSpriteUrl = (id: number, type: 'sprite' | 'artwork' = 'sprite'): string => {
   if (type === 'artwork') {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
   }
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-}
+};
 
 /**
  * Convert height from decimetres to a readable format.
  * PokéAPI: 7 → "0.7 m"
  */
-export function formatHeight(decimetres: number): string {
+export const formatHeight = (decimetres: number): string => {
   const metres = decimetres / 10;
   return `${metres.toFixed(1)} m`;
-}
+};
 
 /**
  * Convert weight from hectograms to a readable format.
  * PokéAPI: 60 → "6.0 kg"
  */
-export function formatWeight(hectograms: number): string {
+export const formatWeight = (hectograms: number): string => {
   const kg = hectograms / 10;
   return `${kg.toFixed(1)} kg`;
-}
+};
 
 /**
  * Get a color class for a stat bar based on the stat value.
  * Used for the stat visualization on detail pages.
  * Low stats are red, mid are yellow, high are green.
  */
-export function getStatColor(value: number): string {
+export const getStatColor = (value: number): string => {
   if (value < 25) return 'bg-red-400';
   if (value < 50) return 'bg-yellow-400';
   if (value < 75) return 'bg-green-400';
   return 'bg-emerald-500';
-}
+};
 
 /**
  * Get the percentile rank (0–100) of a stat value.
@@ -683,7 +684,7 @@ export function getStatColor(value: number): string {
  * @param value     The raw base stat value
  * @returns         0–100 percentile rank
  */
-export function getStatPercentile(statName: string, value: number): number {
+export const getStatPercentile = (statName: string, value: number): number => {
   const breakpoints =
     pokemonStatsData.percentileBreakpoints[statName as keyof typeof pokemonStatsData.percentileBreakpoints];
   if (!breakpoints) return 50; // fallback for unknown stats
@@ -715,4 +716,4 @@ export function getStatPercentile(statName: string, value: number): number {
   }
 
   return 100; // above p100 threshold
-}
+};

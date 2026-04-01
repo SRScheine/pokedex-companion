@@ -73,7 +73,7 @@ import TypeBadge from '@/components/TypeBadge';
 const STORAGE_KEY = 'pokedex-companion-team';
 const MAX_TEAM_SIZE = 6;
 
-export default function TeamBuilder() {
+const TeamBuilder = () => {
   // Current team — array of up to 6 TeamMember objects
   const [team, setTeam] = useState<TeamMember[]>([]);
 
@@ -174,7 +174,7 @@ export default function TeamBuilder() {
   // TEAM MANAGEMENT
   // ============================================================
 
-  async function addToTeam(pokemonId: number, name: string) {
+  const addToTeam = async (pokemonId: number, name: string) => {
     if (team.length >= MAX_TEAM_SIZE) return;
     if (team.some((m) => m.id === pokemonId)) return; // Already on team
 
@@ -200,17 +200,17 @@ export default function TeamBuilder() {
     setTeam((prev) => [...prev, newMember]);
     setSearchQuery('');
     setSearchResults([]);
-  }
+  };
 
-  function removeFromTeam(pokemonId: number) {
+  const removeFromTeam = (pokemonId: number) => {
     setTeam((prev) => prev.filter((m) => m.id !== pokemonId));
-  }
+  };
 
-  function saveNickname(pokemonId: number) {
+  const saveNickname = (pokemonId: number) => {
     setTeam((prev) => prev.map((m) => (m.id === pokemonId ? {...m, nickname: nicknameInput.trim() || undefined} : m)));
     setEditingNickname(null);
     setNicknameInput('');
-  }
+  };
 
   // ============================================================
   // RENDER
@@ -461,4 +461,6 @@ export default function TeamBuilder() {
       )}
     </div>
   );
-}
+};
+
+export default TeamBuilder;

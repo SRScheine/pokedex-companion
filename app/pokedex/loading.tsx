@@ -47,7 +47,7 @@
 */
 
 // Skeleton for a single Pokémon card
-function CardSkeleton() {
+const CardSkeleton = () => {
   return (
     /*
       animate-pulse: Tailwind's built-in pulse animation.
@@ -71,9 +71,9 @@ function CardSkeleton() {
       </div>
     </div>
   );
-}
+};
 
-export default function PokedexLoading() {
+const PokedexLoading = () => {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header skeleton */}
@@ -99,4 +99,6 @@ export default function PokedexLoading() {
       </div>
     </div>
   );
-}
+};
+
+export default PokedexLoading;

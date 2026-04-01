@@ -69,7 +69,7 @@ import Image from 'next/image';
 // but for updating the URL.
 import {useRouter, useSearchParams} from 'next/navigation';
 
-export default function PokedexSearch() {
+const PokedexSearch = () => {
   const router = useRouter();
 
   /*
@@ -93,7 +93,7 @@ export default function PokedexSearch() {
   const [suggestions, setSuggestions] = useState<Array<{id: number; name: string}>>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  function handleSearch(e: React.FormEvent) {
+  const handleSearch = (e: React.FormEvent) => {
     /*
       e.preventDefault():
       HTML forms submit by default — they do a full page reload
@@ -136,13 +136,13 @@ export default function PokedexSearch() {
       The URL IS the navigation param on web.
     */
     router.push(`/pokedex?${params.toString()}`);
-  }
+  };
 
-  function handleClear() {
+  const handleClear = () => {
     setQuery('');
     setSuggestions([]);
     router.push('/pokedex');
-  }
+  };
 
   /*
   fetchSuggestions: fetches live search results as the user types.
@@ -317,4 +317,6 @@ export default function PokedexSearch() {
       )}
     </form>
   );
-}
+};
+
+export default PokedexSearch;

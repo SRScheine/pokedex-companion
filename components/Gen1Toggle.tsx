@@ -29,7 +29,7 @@ const STORAGE_KEY = 'pokedex-gen1-only';
   must access it inside useEffect because localStorage doesn't
   exist on the server during SSR.
 */
-export function useGen1Only() {
+export const useGen1Only = () => {
   const [gen1Only, setGen1Only] = useState(true); // default: Gen 1 on
   const [hydrated, setHydrated] = useState(false);
 
@@ -40,23 +40,23 @@ export function useGen1Only() {
     setHydrated(true);
   }, []);
 
-  function toggle() {
+  const toggle = () => {
     setGen1Only((prev) => {
       const next = !prev;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       return next;
     });
-  }
+  };
 
   return {gen1Only, toggle, hydrated};
-}
+};
 
 interface Gen1ToggleProps {
   gen1Only: boolean;
   onToggle: () => void;
 }
 
-export default function Gen1Toggle({gen1Only, onToggle}: Gen1ToggleProps) {
+const Gen1Toggle = ({gen1Only, onToggle}: Gen1ToggleProps) => {
   return (
     <button
       onClick={onToggle}
@@ -80,4 +80,6 @@ export default function Gen1Toggle({gen1Only, onToggle}: Gen1ToggleProps) {
       Gen 1 Only
     </button>
   );
-}
+};
+
+export default Gen1Toggle;

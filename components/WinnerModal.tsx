@@ -71,7 +71,7 @@ const TYPE_GRADIENTS: Record<string, string> = {
   delay, and duration — all calculated from the index so
   they're deterministic (same result every render).
 */
-function ConfettiParticle({index}: {index: number}) {
+const ConfettiParticle = ({index}: {index: number}) => {
   const colors = ['#FF1111', '#FFDE00', '#3B4CCA', '#78C850', '#F08030', '#F85888'];
   const color = colors[index % colors.length];
 
@@ -129,9 +129,9 @@ function ConfettiParticle({index}: {index: number}) {
       }}
     />
   );
-}
+};
 
-export default function WinnerModal({winner, onClose, onSpinAgain}: WinnerModalProps) {
+const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
   const gradientClass = TYPE_GRADIENTS[winner.primaryType] ?? 'from-pokemon-red to-pokemon-darkred';
   const displayName = winner.name.charAt(0).toUpperCase() + winner.name.slice(1);
   const artworkUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${winner.id}.png`;
@@ -175,9 +175,9 @@ export default function WinnerModal({winner, onClose, onSpinAgain}: WinnerModalP
     same cleanup pattern as removing an RN event listener.
   */
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-    }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -466,4 +466,6 @@ export default function WinnerModal({winner, onClose, onSpinAgain}: WinnerModalP
       `}</style>
     </div>
   );
-}
+};
+
+export default WinnerModal;

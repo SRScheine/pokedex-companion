@@ -109,19 +109,19 @@ const PERCENTILE_RINGS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   add 180° to flip it back into the readable -90° to +90° range.
   Step 4: normalize again after the potential flip.
 */
-function getReadableRotation(angleRad: number): number {
+const getReadableRotation = (angleRad: number): number => {
   let deg = (angleRad * 180) / Math.PI + 90;
   deg = ((deg % 360) + 360) % 360;
   if (deg > 90 && deg < 270) deg += 180;
   return ((deg % 360) + 360) % 360;
-}
+};
 
 interface StatRadarProps {
   stats: PokemonStat[];
   primaryType: string;
 }
 
-export default function StatRadar({stats, primaryType}: StatRadarProps) {
+const StatRadar = ({stats, primaryType}: StatRadarProps) => {
   const size = 550;
   const cx = size / 2;
   const cy = size / 2;
@@ -291,4 +291,6 @@ export default function StatRadar({stats, primaryType}: StatRadarProps) {
       })}
     </svg>
   );
-}
+};
+
+export default StatRadar;

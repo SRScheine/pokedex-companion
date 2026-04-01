@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   description: 'Spin the wheel to pick a Pokémon!',
 };
 
-export default function SpinPage() {
+const SpinPage = () => {
   /*
     Not async — no server data to fetch.
     A Server Component doesn't need to be async unless it awaits
@@ -74,4 +74,6 @@ export default function SpinPage() {
       </Suspense>
     </div>
   );
-}
+};
+
+export default SpinPage;

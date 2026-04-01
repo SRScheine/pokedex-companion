@@ -27,7 +27,7 @@ const MAX_STATS: Record<string, number> = {
   speed: 200,
 };
 
-export default function StatBar({stat}: StatBarProps) {
+const StatBar = ({stat}: StatBarProps) => {
   const statName = STAT_NAMES[stat.stat.name] ?? stat.stat.name;
   const maxStat = MAX_STATS[stat.stat.name] ?? 255; // Fallback to 255 for unknown stats
   const percentage = Math.round((stat.base_stat / maxStat) * 100);
@@ -100,4 +100,6 @@ export default function StatBar({stat}: StatBarProps) {
       </div>
     </div>
   );
-}
+};
+
+export default StatBar;

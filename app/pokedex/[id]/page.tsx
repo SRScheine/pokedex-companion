@@ -84,18 +84,18 @@ import TypeDefenses from '@/components/TypeDefenses';
 // Tells Next.js which [id] values to pre-render at build time.
 // Returns an array of param objects — one per page to generate.
 // ============================================================
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return Array.from({length: TOTAL_POKEMON}, (_, i) => ({
     id: String(i + 1), // "1", "2", "3", ... "1025"
   }));
-}
+};
 
 // ============================================================
 // DYNAMIC METADATA
 // Metadata can be dynamic too — we generate it per Pokémon.
 // The browser tab will show "Pikachu #025 | Pokémon Companion"
 // ============================================================
-export async function generateMetadata({params}: {params: Promise<{id: string}>}): Promise<Metadata> {
+export const generateMetadata = async ({params}: {params: Promise<{id: string}>}): Promise<Metadata> => {
   const {id} = await params;
   const [pokemon] = await getPokemonWithSpecies(id);
 
@@ -107,12 +107,12 @@ export async function generateMetadata({params}: {params: Promise<{id: string}>}
     title: `${capitalize(pokemon.name)} ${formatPokemonId(pokemon.id)}`,
     description: `${capitalize(pokemon.name)}'s stats, moves, and evolution chain.`,
   };
-}
+};
 
 // ============================================================
 // PAGE COMPONENT
 // ============================================================
-export default async function PokemonDetailPage({params}: {params: Promise<{id: string}>}) {
+const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
   const {id} = await params;
 
   /*
@@ -380,4 +380,6 @@ export default async function PokemonDetailPage({params}: {params: Promise<{id: 
       />
     </div>
   );
-}
+};
+
+export default PokemonDetailPage;

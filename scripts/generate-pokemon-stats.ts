@@ -58,7 +58,7 @@ interface PokemonData {
   In production code you'd use a library like p-retry.
   For a one-off script, a simple recursive retry is fine.
 */
-async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+const fetchWithRetry = async (url: string, retries = 3): Promise<Response> => {
   try {
     const res = await fetch(url);
     if (!res.ok) {
@@ -75,7 +75,7 @@ async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
     }
     throw err;
   }
-}
+};
 
 /*
   fetchInBatches: fetches an array of URLs in parallel batches.
@@ -87,7 +87,7 @@ async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
   In RN: same pattern — you'd use this for any large parallel fetch.
   On web: identical, this is plain JavaScript async/await.
 */
-async function fetchInBatches<T>(urls: string[], batchSize = 50): Promise<T[]> {
+const fetchInBatches = async <T>(urls: string[], batchSize = 50): Promise<T[]> => {
   const results: T[] = [];
   for (let i = 0; i < urls.length; i += batchSize) {
     const batch = urls.slice(i, i + batchSize);
@@ -105,7 +105,7 @@ async function fetchInBatches<T>(urls: string[], batchSize = 50): Promise<T[]> {
     }
   }
   return results;
-}
+};
 
 /*
   computePercentileBreakpoints: given an array of stat values,
@@ -119,7 +119,7 @@ async function fetchInBatches<T>(urls: string[], batchSize = 50): Promise<T[]> {
   Linear interpolation gives smoother results than just rounding
   to the nearest index, especially for small populations.
 */
-function computePercentileBreakpoints(values: number[]): Record<string, number> {
+const computePercentileBreakpoints = (values: number[]): Record<string, number> => {
   const sorted = [...values].sort((a, b) => a - b);
   const n = sorted.length;
   const breakpoints: Record<string, number> = {};
@@ -142,9 +142,9 @@ function computePercentileBreakpoints(values: number[]): Record<string, number> 
   }
 
   return breakpoints;
-}
+};
 
-async function main() {
+const main = async () => {
   console.log('🔍 Fetching Pokémon list...');
 
   // Fetch all Pokémon names + URLs (limit=1000000 to get all)
@@ -204,7 +204,7 @@ async function main() {
   console.log(`\n✨ Written to ${OUTPUT_PATH}`);
   console.log('\nSample output (HP):');
   console.log(percentileBreakpoints['hp']);
-}
+};
 
 main().catch((err) => {
   console.error('Script failed:', err);

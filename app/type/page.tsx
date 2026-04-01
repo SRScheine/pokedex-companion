@@ -50,14 +50,14 @@ export const metadata: Metadata = {
   0x  → gray   — immune, completely useless attacking into this type
   1x  → blank  — neutral, no visual noise for the common case
 */
-function getCellStyle(value: number): {bg: string; label: string} | null {
+const getCellStyle = (value: number): {bg: string; label: string} | null => {
   if (value === 2) return {bg: 'bg-emerald-600', label: '2'};
   if (value === 0.5) return {bg: 'bg-rose-700', label: '½'};
   if (value === 0) return {bg: 'bg-gray-900', label: '0'};
   return null; // neutral — render blank
-}
+};
 
-export default async function TypePage() {
+const TypePage = async () => {
   /*
     Fetch all 18 type definitions in parallel.
     Each contains full damage_relations so we can compute
@@ -254,4 +254,6 @@ export default async function TypePage() {
       </p>
     </div>
   );
-}
+};
+
+export default TypePage;

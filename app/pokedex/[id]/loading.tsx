@@ -6,7 +6,7 @@
   Same pattern as app/pokedex/loading.tsx — just a different shape.
 */
 
-export default function PokemonDetailLoading() {
+const PokemonDetailLoading = () => {
   return (
     <div className="mx-auto max-w-4xl animate-pulse px-4 py-8">
       {/* Back link skeleton */}
@@ -51,4 +51,6 @@ export default function PokemonDetailLoading() {
       </div>
     </div>
   );
-}
+};
+
+export default PokemonDetailLoading;

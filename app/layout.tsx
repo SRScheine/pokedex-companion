@@ -137,7 +137,7 @@ export const metadata: Metadata = {
 //
 // Here we return the HTML shell + our Navbar + whatever page is active.
 // ============================================================
-export default function RootLayout({children}: {children: React.ReactNode}) {
+const RootLayout = ({children}: {children: React.ReactNode}) => {
   return (
     /*
       <html> and <body> tags:
@@ -276,4 +276,6 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

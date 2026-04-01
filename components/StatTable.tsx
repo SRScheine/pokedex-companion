@@ -12,31 +12,31 @@ import {PokemonStat, STAT_NAMES} from '@/types/pokemon';
 
 const STAT_ORDER = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
 
-function ordinal(n: number): string {
+const ordinal = (n: number): string => {
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0]);
-}
+};
 
 /*
   getTierColor: returns a hex color based on percentile rank.
   Tiers reward genuinely elite stats (S/A) while clearly
   flagging weaknesses (D) in red.
 */
-function getTierColor(percentile: number): string {
+const getTierColor = (percentile: number): string => {
   if (percentile >= 90) return '#F59E0B'; // S — gold
   if (percentile >= 75) return '#16A34A'; // A — bold green
   if (percentile >= 50) return '#4ADE80'; // B — faint green
   if (percentile >= 25) return '#9CA3AF'; // C — gray
   return '#EF4444'; // D — red
-}
+};
 
 interface StatTableProps {
   stats: PokemonStat[];
   primaryType: string;
 }
 
-export default function StatTable({stats, primaryType}: StatTableProps) {
+const StatTable = ({stats, primaryType}: StatTableProps) => {
   const statMap = Object.fromEntries(stats.map((s) => [s.stat.name, s.base_stat]));
 
   const rows = STAT_ORDER.map((key) => {
@@ -87,4 +87,6 @@ export default function StatTable({stats, primaryType}: StatTableProps) {
       </div>
     </div>
   );
-}
+};
+
+export default StatTable;

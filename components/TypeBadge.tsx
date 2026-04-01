@@ -122,7 +122,7 @@ const SIZE_CLASSES = {
 // ============================================================
 // COMPONENT
 // ============================================================
-export default function TypeBadge({typeName, size = 'md', className = '', useAbbrev = false}: TypeBadgeProps) {
+const TypeBadge = ({typeName, size = 'md', className = '', useAbbrev = false}: TypeBadgeProps) => {
   /*
     Type safety: cast to PokemonTypeName for the color lookup.
     If the API sends an unknown type, we fall back to a gray color.
@@ -159,4 +159,6 @@ export default function TypeBadge({typeName, size = 'md', className = '', useAbb
       {useAbbrev ? (TYPE_ABBREV[typeName] ?? typeName) : typeName}
     </span>
   );
-}
+};
+
+export default TypeBadge;

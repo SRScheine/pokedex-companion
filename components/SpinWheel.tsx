@@ -80,7 +80,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 // Fetch a single Pokémon and return just what the wheel needs
-async function fetchPokemon(idOrName: number | string): Promise<WheelPokemon | null> {
+const fetchPokemon = async (idOrName: number | string): Promise<WheelPokemon | null> => {
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${idOrName}`, {
       cache: 'force-cache',
@@ -96,7 +96,7 @@ async function fetchPokemon(idOrName: number | string): Promise<WheelPokemon | n
   } catch {
     return null;
   }
-}
+};
 
 /*
   drawWheel — the canvas drawing function.
@@ -110,12 +110,12 @@ async function fetchPokemon(idOrName: number | string): Promise<WheelPokemon | n
   - rotation: current rotation angle in radians
   - sprites: preloaded HTMLImageElement objects, keyed by Pokémon ID
 */
-function drawWheel(
+const drawWheel = (
   canvas: HTMLCanvasElement,
   pokemon: WheelPokemon[],
   rotation: number,
   sprites: Record<number, HTMLImageElement>
-) {
+) => {
   /*
     getContext("2d"): gets the 2D drawing context — the object with
     all the drawing methods (arc, fillText, drawImage, etc).
@@ -333,9 +333,9 @@ function drawWheel(
     Always clean up canvas state you don't want to persist.
   */
   ctx.shadowBlur = 0;
-}
+};
 
-export default function SpinWheel() {
+const SpinWheel = () => {
   // The Pokémon currently on the wheel
   const [pokemon, setPokemon] = useState<WheelPokemon[]>([]);
 
@@ -382,7 +382,7 @@ export default function SpinWheel() {
   const animFrameRef = useRef<number>(0);
 
   // Load a sprite image for canvas drawing
-  function loadSprite(p: WheelPokemon) {
+  const loadSprite = (p: WheelPokemon) => {
     /*
       new window.Image(): creates an HTMLImageElement.
       We use window.Image explicitly (not just Image) to avoid
@@ -401,18 +401,18 @@ export default function SpinWheel() {
       */
       setSprites((prev) => ({...prev, [p.id]: img}));
     };
-  }
+  };
 
   // Load Ben's favorites on mount
   useEffect(() => {
-    async function loadFavorites() {
+    const loadFavorites = async () => {
       setIsLoadingFavorites(true);
       const results = await Promise.all(BENS_FAVORITES_IDS.map(fetchPokemon));
       const valid = results.filter(Boolean) as WheelPokemon[];
       setPokemon(valid);
       valid.forEach(loadSprite);
       setIsLoadingFavorites(false);
-    }
+    };
     loadFavorites();
   }, []); // Empty array = run once on mount, same as RN
 
@@ -431,17 +431,17 @@ export default function SpinWheel() {
   }, [pokemon, sprites]);
 
   // Reset wheel to Ben's favorites
-  async function loadBensFavorites() {
+  const loadBensFavorites = async () => {
     setIsLoadingFavorites(true);
     const results = await Promise.all(BENS_FAVORITES_IDS.map(fetchPokemon));
     const valid = results.filter(Boolean) as WheelPokemon[];
     setPokemon(valid);
     valid.forEach(loadSprite);
     setIsLoadingFavorites(false);
-  }
+  };
 
   // Add a random Pokémon from the full national dex (1-1025)
-  async function addRandom() {
+  const addRandom = async () => {
     setIsLoadingRandom(true);
     const ids = new Set<number>();
     while (ids.size < MAX_SLOTS) {
@@ -452,7 +452,7 @@ export default function SpinWheel() {
     setPokemon(valid);
     valid.forEach(loadSprite);
     setIsLoadingRandom(false);
-  }
+  };
 
   /*
     useCallback memoizes the search function.
@@ -488,7 +488,7 @@ export default function SpinWheel() {
     }
   }, []);
 
-  async function addFromSearch(id: number) {
+  const addFromSearch = async (id: number) => {
     if (pokemon.length >= MAX_SLOTS) return;
     if (pokemon.some((p) => p.id === id)) return;
     const p = await fetchPokemon(id);
@@ -497,14 +497,14 @@ export default function SpinWheel() {
     loadSprite(p);
     setSearchQuery('');
     setSearchResults([]);
-  }
+  };
 
-  function removePokemon(id: number) {
+  const removePokemon = (id: number) => {
     setPokemon((prev) => prev.filter((p) => p.id !== id));
-  }
+  };
 
   // THE SPIN FUNCTION
-  function spin() {
+  const spin = () => {
     if (isSpinning || pokemon.length < MIN_TO_SPIN) return;
 
     const sliceAngle = (2 * Math.PI) / pokemon.length;
@@ -549,7 +549,7 @@ export default function SpinWheel() {
 
     setIsSpinning(true);
 
-    function animate(now: number) {
+    const animate = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / SPIN_DURATION, 1);
       const eased = 1 - Math.pow(1 - progress, 4);
@@ -567,10 +567,10 @@ export default function SpinWheel() {
         setIsSpinning(false);
         setWinner(pokemon[winnerIndex]);
       }
-    }
+    };
 
     animFrameRef.current = requestAnimationFrame(animate);
-  }
+  };
 
   // Cancel any in-progress animation when component unmounts
   useEffect(() => {
@@ -817,4 +817,6 @@ export default function SpinWheel() {
       {winner && <WinnerModal winner={winner} onClose={() => setWinner(null)} onSpinAgain={() => setWinner(null)} />}
     </div>
   );
-}
+};
+
+export default SpinWheel;

@@ -94,7 +94,7 @@ const NAV_LINKS: NavLink[] = [
 // ============================================================
 // COMPONENT
 // ============================================================
-export default function Navbar() {
+const Navbar = () => {
   /*
     useState: works EXACTLY the same as in React Native.
     No difference whatsoever. useState, useEffect, useCallback,
@@ -379,4 +379,6 @@ export default function Navbar() {
       </div>
     </header>
   );
-}
+};
+
+export default Navbar;

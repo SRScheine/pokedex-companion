@@ -91,14 +91,14 @@ const DARK_TEXT_TYPES = new Set(['electric', 'ground', 'ice', 'normal']);
   0×  → near-black — immune
   1×  → light gray — neutral, unifies the grid without distraction
 */
-function getCellStyle(value: number): {bg: string; text: string; label: string} {
+const getCellStyle = (value: number): {bg: string; text: string; label: string} => {
   if (value === 4) return {bg: '#65a30d', text: '#fff', label: '4'}; // lime-600
   if (value === 2) return {bg: '#059669', text: '#fff', label: '2'}; // emerald-600
   if (value === 0.5) return {bg: '#be123c', text: '#fff', label: '½'}; // rose-700
   if (value === 0.25) return {bg: '#b45309', text: '#fff', label: '¼'}; // purple-800
   if (value === 0) return {bg: '#111827', text: '#fff', label: '0'}; // gray-900
   return {bg: '#f3f4f6', text: '#9ca3af', label: ''}; // neutral
-}
+};
 
 const getPokemonTypeStringFromArray = (types: string[]) => {
   let typeString = '';
@@ -116,7 +116,7 @@ interface TypeDefensesProps {
   pokemonTypes: string[]; // e.g. ['grass', 'poison']
 }
 
-export default async function TypeDefenses({name, pokemonTypes}: TypeDefensesProps) {
+const TypeDefenses = async ({name, pokemonTypes}: TypeDefensesProps) => {
   /*
     Fetch damage relations for each of this Pokémon's types.
     For a single-type Pokémon this is 1 fetch.
@@ -232,4 +232,6 @@ export default async function TypeDefenses({name, pokemonTypes}: TypeDefensesPro
       </div>
     </div>
   );
-}
+};
+
+export default TypeDefenses;

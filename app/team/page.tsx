@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 
 // Skeleton shown while TeamBuilder hydrates
 // Keeps the page layout stable during the localStorage load
-function TeamSkeleton() {
+const TeamSkeleton = () => {
   return (
     <div className="animate-pulse">
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
@@ -46,9 +46,9 @@ function TeamSkeleton() {
       <div className="skeleton h-48 rounded-2xl" />
     </div>
   );
-}
+};
 
-export default function TeamPage() {
+const TeamPage = () => {
   /*
     Note: this component is NOT async.
     No data to fetch on the server — team lives in the browser.
@@ -80,4 +80,6 @@ export default function TeamPage() {
       </Suspense>
     </div>
   );
-}
+};
+
+export default TeamPage;

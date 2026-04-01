@@ -75,7 +75,7 @@ interface PokedexPageProps {
   }>;
 }
 
-export default async function PokedexPage({searchParams}: PokedexPageProps) {
+const PokedexPage = async ({searchParams}: PokedexPageProps) => {
   // Await searchParams (required in Next.js 15+)
   const params = await searchParams;
   const searchQuery = params.search ?? '';
@@ -315,4 +315,6 @@ export default async function PokedexPage({searchParams}: PokedexPageProps) {
       )}
     </div>
   );
-}
+};
+
+export default PokedexPage;

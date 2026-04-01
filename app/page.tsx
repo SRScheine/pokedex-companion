@@ -97,7 +97,7 @@ const QUICK_LINKS = [
   },
 ];
 
-export default async function HomePage() {
+const HomePage = async () => {
   /*
     Direct await in a Server Component.
     In React Native you needed useEffect + useState for this.
@@ -317,4 +317,6 @@ export default async function HomePage() {
       </section>
     </div>
   );
-}
+};
+
+export default HomePage;
