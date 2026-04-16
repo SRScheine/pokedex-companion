@@ -307,7 +307,7 @@ const HomePage = async () => {
 
       {/* ── TIP BANNER ── */}
       <section className="bg-pokemon-blue mt-4 py-8 text-white">
-        <div className="mx-auto max-w-6xl px-4 text-center">
+        <div className="mx-auto flex max-w-6xl flex-col items-center px-4 text-center">
           <p className="mb-2 text-sm font-medium tracking-widest text-white/70 uppercase">Let&apos;s Go Tip</p>
           <p className="mx-auto max-w-2xl text-lg font-medium">
             💡 In Let&apos;s Go, you can lure Pokémon with Berries before throwing. A Razz Berry raises your catch rate

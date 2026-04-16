@@ -49,6 +49,9 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 import Image from 'next/image';
 import WinnerModal, {WheelPokemon} from '@/components/WinnerModal';
 import {capitalize, formatPokemonId} from '@/lib/api';
+import {useAppSelector} from '@/store/hooks';
+import {selectFavorites} from '@/store/favoritesSlice';
+import StarIcon from '@/components/StarIcon';
 
 const MAX_SLOTS = 6;
 const MIN_TO_SPIN = 2;
@@ -91,7 +94,7 @@ const fetchPokemon = async (idOrName: number | string): Promise<WheelPokemon | n
       id: data.id,
       name: data.name,
       sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${data.id}.png`,
-      primaryType: data.types[0].type.name,
+      types: data.types,
     };
   } catch {
     return null;
@@ -188,7 +191,7 @@ const drawWheel = (
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, radius, startAngle, endAngle);
     ctx.closePath();
-    ctx.fillStyle = TYPE_COLORS[p.primaryType] ?? '#A8A878';
+    ctx.fillStyle = TYPE_COLORS[p.types[0]?.type.name] ?? '#A8A878';
     ctx.fill();
 
     // White dividing line between slices
@@ -403,6 +406,36 @@ const SpinWheel = () => {
     };
   };
 
+  /*
+    Read the user's starred Pokémon from Redux.
+    This component subscribes to the store — if the user favorites
+    or unfavorites a Pokémon anywhere else in the app while this
+    page is open, favoritesCount updates automatically.
+  */
+  const favorites = useAppSelector(selectFavorites);
+  const canLoadMyFavorites = favorites.length >= MIN_TO_SPIN;
+
+  /*
+    loadMyFavorites — no API fetch needed.
+    FavoritePokemon already has id, name, types. We just derive
+    the small sprite URL (same format fetchPokemon uses) from the id.
+
+    If the user has more than MAX_SLOTS favorites, shuffle and take
+    the first MAX_SLOTS so the sample is random each time.
+  */
+  const loadMyFavorites = () => {
+    const shuffled = [...favorites].sort(() => Math.random() - 0.5);
+    const sample = shuffled.slice(0, MAX_SLOTS);
+    const wheelPokemon: WheelPokemon[] = sample.map((fav) => ({
+      id: fav.id,
+      name: fav.name,
+      sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${fav.id}.png`,
+      types: fav.types,
+    }));
+    setPokemon(wheelPokemon);
+    wheelPokemon.forEach(loadSprite);
+  };
+
   // Load Ben's favorites on mount
   useEffect(() => {
     const loadFavorites = async () => {
@@ -591,6 +624,15 @@ const SpinWheel = () => {
         In RN: flexWrap: 'wrap' — same prop, same value.
       */}
       <div className="flex w-full flex-wrap justify-center gap-2">
+        <button
+          onClick={loadMyFavorites}
+          disabled={!canLoadMyFavorites || isSpinning}
+          title={!canLoadMyFavorites ? `Star at least ${MIN_TO_SPIN} Pokémon to use this` : undefined}
+          className="bg-pokemon-red flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition-colors hover:bg-pokemon-darkred disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <StarIcon size={14} filled />
+          My Favorites
+        </button>
         <button
           onClick={loadBensFavorites}
           disabled={isLoadingFavorites || isSpinning || isLoadingRandom}

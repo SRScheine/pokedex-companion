@@ -10,11 +10,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {Pokemon} from '@/types/pokemon';
+import type {FavoritePokemon} from '@/types/pokemon';
 import {capitalize, formatPokemonId, getSpriteUrl} from '@/lib/api';
 import TypeBadge from '@/components/TypeBadge';
+import FavoriteButton from '@/components/FavoriteButton';
 
 interface PokemonCardProps {
-  pokemon: Pokemon;
+  pokemon: Pick<Pokemon, 'id' | 'name' | 'types'>;
 }
 
 const PokemonCard = ({pokemon}: PokemonCardProps) => {
@@ -24,6 +26,29 @@ const PokemonCard = ({pokemon}: PokemonCardProps) => {
     This is a common Pokédex UI pattern — cards feel unique per Pokémon.
   */
   const primaryType = pokemon.types[0].type.name;
+
+  /*
+    Build the FavoritePokemon data shape here in the Server Component.
+    This is a pure data transform — no hooks, no browser APIs — so it's
+    completely safe to do on the server.
+
+    We pass this down to FavoriteButton as a prop. FavoriteButton is a
+    Client Component ("use client") that connects to Redux on the client.
+
+    SERVER → CLIENT PROP PASSING RULE:
+    Props crossing the server/client boundary must be serializable
+    (strings, numbers, plain objects, arrays — no functions, no class
+    instances, no Dates). Our favData is all primitives: safe to pass.
+
+    In RN: this concern doesn't exist — everything runs on the device.
+    It's a Next.js-specific pattern for optimizing what runs on the server.
+  */
+  const favData: Omit<FavoritePokemon, 'addedAt'> = {
+    id: pokemon.id,
+    name: pokemon.name,
+    sprite: getSpriteUrl(pokemon.id, 'artwork'),
+    types: pokemon.types,
+  };
 
   return (
     /*
@@ -52,6 +77,18 @@ const PokemonCard = ({pokemon}: PokemonCardProps) => {
         className={`absolute inset-0 bg-type-${primaryType} translate-y-4 scale-75 rounded-full opacity-10`}
         aria-hidden="true"
       />
+
+      {/*
+        FavoriteButton: a Client Component rendered inside a Server Component.
+        Next.js handles the boundary automatically — the button hydrates on the
+        client and connects to Redux, while the card shell stays server-rendered.
+
+        absolute top-2 right-2 z-20: pins the button to the top-right corner of
+        the card. The card's <Link> already has `relative` so this positions
+        against the card boundary, not the page.
+        z-20: sits above the decorative circle (z-10) and image (z-10).
+      */}
+      <FavoriteButton pokemon={favData} className="absolute top-2 right-2 z-20" />
 
       {/* Pokédex number */}
       <p className="text-pokemon-gray z-10 mb-1 self-start text-xs font-medium">{formatPokemonId(pokemon.id)}</p>

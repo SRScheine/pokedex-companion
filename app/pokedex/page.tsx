@@ -48,7 +48,7 @@
 import {Metadata} from 'next';
 import {Suspense} from 'react';
 import {getPokemonListWithDetails, searchPokemon} from '@/lib/api';
-import {TOTAL_POKEMON} from '@/types/pokemon';
+import {Pokemon, TOTAL_POKEMON} from '@/types/pokemon';
 import PokemonCard from '@/components/PokemonCard';
 import PokedexSearch from '@/components/PokedexSearch';
 import Link from 'next/link';
@@ -196,7 +196,7 @@ const PokedexPage = async ({searchParams}: PokedexPageProps) => {
           while staying usable on small phone screens.
         */
         <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {pokemon.map((p: any) => (
+          {pokemon.map((p: Pokemon) => (
             <PokemonCard key={p.id} pokemon={p} />
           ))}
         </div>

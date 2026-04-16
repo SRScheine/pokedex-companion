@@ -16,12 +16,14 @@
 import {useEffect} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import type {PokemonType} from '@/types/pokemon';
+import FavoriteButton from '@/components/FavoriteButton';
 
 export interface WheelPokemon {
   id: number;
   name: string;
   sprite: string;
-  primaryType: string;
+  types: PokemonType[];
 }
 
 interface WinnerModalProps {
@@ -75,64 +77,53 @@ const ConfettiParticle = ({index}: {index: number}) => {
   const colors = ['#FF1111', '#FFDE00', '#3B4CCA', '#78C850', '#F08030', '#F85888'];
   const color = colors[index % colors.length];
 
-  /*
-    left: horizontal starting position as a percentage.
-    We use modulo arithmetic to spread particles across
-    the full width without randomness (predictable, no
-    hydration mismatch between server and client).
-  */
   const left = `${(index * 37 + 5) % 100}%`;
 
   /*
-    animation-delay: staggers the start time of each particle
-    so they don't all fall at once.
-    In RN: you'd stagger Animated.timing() calls in a sequence.
-    On web: CSS animation-delay handles staggering natively.
+    Tighter delay range (0–0.5s vs the old 0–1.2s) so all particles
+    burst within half a second rather than trickling in over a full second.
+    Shorter durations (0.9–1.4s) make the fall feel snappier.
   */
-  const delay = `${(index * 0.12) % 1.2}s`;
-  const duration = `${1.4 + (index % 4) * 0.25}s`;
-  const size = [10, 7, 5][index % 3];
+  const delay = `${(index * 0.05) % 0.5}s`;
+  const duration = `${0.9 + (index % 6) * 0.1}s`;
+
+  /*
+    Three flight paths assigned by index:
+      confettiFallLeft  — drifts left as it falls
+      confettiFallRight — drifts right as it falls
+      confettiFallStraight — slight wobble, mostly vertical
+
+    The horizontal drift is what makes confetti feel like it's
+    flying rather than just raining straight down.
+  */
+  const animations = ['confettiFallLeft', 'confettiFallRight', 'confettiFallStraight'];
+  const animName = animations[index % 3];
+
+  // Width of each particle
+  const width = [12, 8, 10, 6, 9, 7][index % 6];
+  // Every third particle is a tall rectangle (paper strip) for variety
+  const height = index % 3 === 0 ? Math.round(width * 2.5) : width;
+  // Mix of circles, squares, and strips
+  const borderRadius = index % 3 === 1 ? '50%' : '2px';
 
   return (
     <div
-      /*
-        absolute top-0: positioned relative to the nearest
-        positioned ancestor (the confetti container div).
-        In RN: position: 'absolute', top: 0 — same concept.
-
-        pointer-events-none: this element doesn't receive
-        any click/touch events. Clicks pass through it.
-        In RN: pointerEvents="none" on a View — same idea.
-      */
       className="pointer-events-none absolute top-0"
       style={{
         left,
-        width: size,
-        height: size,
+        width,
+        height,
         backgroundColor: color,
-        /*
-          borderRadius: 50% makes a circle.
-          In RN: borderRadius = width/2 for a circle.
-          On web: 50% always makes a circle regardless of size.
-        */
-        borderRadius: index % 2 === 0 ? '50%' : '2px',
-        /*
-          CSS animation shorthand:
-          `name duration delay timing-function fill-mode`
-
-          forwards: keeps the element in its final animation
-          state (opacity: 0) instead of snapping back.
-          In RN: you'd set isVisible state in the onComplete
-          callback. CSS handles this with fill-mode.
-        */
-        animation: `confettiFall ${duration} ${delay} ease-in forwards`,
+        borderRadius,
+        animation: `${animName} ${duration} ${delay} ease-in both`,
       }}
     />
   );
 };
 
 const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
-  const gradientClass = TYPE_GRADIENTS[winner.primaryType] ?? 'from-pokemon-red to-pokemon-darkred';
+  const primaryTypeName = winner.types[0]?.type.name ?? 'normal';
+  const gradientClass = TYPE_GRADIENTS[primaryTypeName] ?? 'from-pokemon-red to-pokemon-darkred';
   const displayName = winner.name.charAt(0).toUpperCase() + winner.name.slice(1);
   const artworkUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${winner.id}.png`;
 
@@ -209,8 +200,8 @@ const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
         overflow-hidden: clips confetti particles that go off-screen.
         pointer-events-none: clicks pass through to elements below.
       */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {Array.from({length: 32}).map((_, i) => (
+      <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+        {Array.from({length: 64}).map((_, i) => (
           <ConfettiParticle key={i} index={i} />
         ))}
       </div>
@@ -244,7 +235,24 @@ const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
           In RN: you'd use maxWidth in a StyleSheet.
         mx-auto: centers horizontally (margin: 0 auto).
       */}
-      <div className="relative z-10 mx-auto w-full max-w-sm">
+      <div className="relative z-20 mx-auto w-full max-w-sm">
+        {/*
+          ★ FAVORITE BUTTON
+          Positioned absolutely in the top-left corner
+
+          FavoriteButton props:
+          - pokemon: winner (has id, name, sprite, primaryType)
+          - className: positioning + z-index
+
+          WheelPokemon and Omit<FavoritePokemon, 'addedAt'> have
+          identical shapes, so winner passes through directly.
+
+          Like the close button, FavoriteButton handles
+          e.stopPropagation() internally to prevent triggering
+          the card's <Link> navigation.
+        */}
+        <FavoriteButton pokemon={winner} className="absolute top-2 left-2 z-20" />
+
         {/*
           ✕ CLOSE BUTTON
           Positioned absolutely in the top-right corner,
@@ -455,9 +463,18 @@ const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
           Used with animation-direction: alternate (from/to ping-pong).
       */}
       <style>{`
-        @keyframes confettiFall {
-          0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        @keyframes confettiFallLeft {
+          0%   { transform: translateY(-60px) translateX(0)      rotate(0deg);    opacity: 1; }
+          100% { transform: translateY(105vh) translateX(-160px)  rotate(-800deg); opacity: 0; }
+        }
+        @keyframes confettiFallRight {
+          0%   { transform: translateY(-60px) translateX(0)     rotate(0deg);   opacity: 1; }
+          100% { transform: translateY(105vh) translateX(160px)  rotate(800deg); opacity: 0; }
+        }
+        @keyframes confettiFallStraight {
+          0%   { transform: translateY(-60px) translateX(0)    rotate(0deg);   opacity: 1; }
+          45%  { transform: translateY(45vh)  translateX(25px)  rotate(400deg); opacity: 1; }
+          100% { transform: translateY(105vh) translateX(-15px) rotate(780deg); opacity: 0; }
         }
         @keyframes winnerFloat {
           from { transform: translateY(0px) scale(1); }

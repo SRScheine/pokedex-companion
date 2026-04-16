@@ -57,6 +57,9 @@
 */
 
 import {useState} from 'react';
+import StarIcon from '@/components/StarIcon';
+import {useAppSelector} from '@/store/hooks';
+import {selectFavoritesCount} from '@/store/favoritesSlice';
 // next/link: the web equivalent of React Navigation's <Link> or
 // navigation.navigate(). It renders an <a> tag but intercepts clicks
 // to do client-side navigation (no full page reload).
@@ -87,8 +90,9 @@ interface NavLink {
 const NAV_LINKS: NavLink[] = [
   {href: '/pokedex', label: 'Pokédex', emoji: '📖'},
   {href: '/type', label: 'Type Chart', emoji: '⚔️'},
-  {href: '/team', label: 'My Team', emoji: '⭐'},
+  {href: '/team', label: 'My Team', emoji: '🎒'},
   {href: '/spin', label: 'Spin!', emoji: '🎡'},
+  {href: '/favorites', label: 'Favorites', emoji: '★'},
 ];
 
 // ============================================================
@@ -105,6 +109,20 @@ const Navbar = () => {
     restriction because everything is a "client" component.
   */
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  /*
+    useAppSelector reads the favorites count from the Redux store.
+    This component now SUBSCRIBES to the store — when any Pokémon is
+    favorited or unfavorited anywhere in the app, this component
+    re-renders automatically and the badge updates.
+
+    No prop drilling. No callback threading. No useEffect to sync state.
+    This is the core value proposition of a global store.
+
+    In RN: identical pattern — useSelector(selectFavoritesCount).
+    The component doesn't care where the data came from or who changed it.
+  */
+  const favoritesCount = useAppSelector(selectFavoritesCount);
 
   /*
     usePathname(): returns the current URL path.
@@ -247,10 +265,10 @@ const Navbar = () => {
                 href={link.href}
                 /*
                   Conditional className based on isActive.
-                  
+
                   In RN: style={[styles.link, isActive && styles.activeLink]}
                   On web: className={`base-classes ${isActive ? 'active-classes' : 'inactive-classes'}`}
-                  
+
                   Both approaches work. A common pattern is template literals
                   for simple cases, or the `clsx` / `cn` utility for complex ones.
                   We'll install clsx later for cleaner conditional classes.
@@ -259,8 +277,27 @@ const Navbar = () => {
                   isActive ? 'bg-pokemon-darkred text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
                 } `}
               >
-                <span>{link.emoji}</span>
+                {link.href === '/favorites' ? (
+                  <StarIcon size={16} filled className="shrink-0" />
+                ) : (
+                  <span>{link.emoji}</span>
+                )}
                 <span>{link.label}</span>
+                {/*
+                  Badge: only shown on the Favorites link when count > 0.
+
+                  This is a "derived render" — the badge appears and
+                  disappears automatically as favoritesCount changes.
+                  No local state. No useEffect. The store drives the UI.
+
+                  In RN: identical conditional render inside the component.
+                  The pattern is framework-agnostic.
+                */}
+                {link.href === '/favorites' && favoritesCount > 0 && (
+                  <span className="bg-pokemon-yellow text-pokemon-black min-w-[1.25rem] rounded-full px-1 text-center text-xs leading-5 font-bold">
+                    {favoritesCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -350,7 +387,7 @@ const Navbar = () => {
         the dropdown from the main bar.
       */}
       <div
-        className={`bg-pokemon-darkred overflow-hidden transition-all duration-300 md:hidden ${isMobileMenuOpen ? 'max-h-64' : 'max-h-0'} `}
+        className={`bg-pokemon-darkred overflow-y-auto transition-all duration-300 md:hidden ${isMobileMenuOpen ? 'max-h-80' : 'max-h-0'} `}
       >
         <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-2">
           {NAV_LINKS.map((link) => {
@@ -370,8 +407,17 @@ const Navbar = () => {
                   isActive ? 'bg-black/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
                 } `}
               >
-                <span className="text-xl">{link.emoji}</span>
+                {link.href === '/favorites' ? (
+                  <StarIcon size={20} filled className="shrink-0" />
+                ) : (
+                  <span className="text-xl">{link.emoji}</span>
+                )}
                 <span>{link.label}</span>
+                {link.href === '/favorites' && favoritesCount > 0 && (
+                  <span className="bg-pokemon-yellow text-pokemon-black min-w-[1.25rem] rounded-full px-1 text-center text-xs leading-5 font-bold">
+                    {favoritesCount}
+                  </span>
+                )}
               </Link>
             );
           })}

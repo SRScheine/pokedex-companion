@@ -73,11 +73,13 @@ import {
   formatName,
 } from '@/lib/api';
 import {LETS_GO_MAX_POKEMON, TOTAL_POKEMON} from '@/types/pokemon';
+import type {FavoritePokemon} from '@/types/pokemon';
 import TypeBadge from '@/components/TypeBadge';
 import StatRadar from '@/components/StatRadar';
 import StatTable from '@/components/StatTable';
 import PokemonDetailClient from '@/components/PokemonDetailClient';
 import TypeDefenses from '@/components/TypeDefenses';
+import FavoriteButton from '@/components/FavoriteButton';
 
 // ============================================================
 // generateStaticParams
@@ -161,6 +163,19 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
 
   const primaryType = pokemon.types[0].type.name;
 
+  /*
+    Build the FavoritePokemon data shape here in the Server Component.
+    This is a pure data transform — no hooks, no browser APIs — so it's
+    completely safe to do on the server. We pass this to FavoriteButton
+    as a prop, which is a Client Component that connects to Redux.
+  */
+  const favData: Omit<FavoritePokemon, 'addedAt'> = {
+    id: pokemon.id,
+    name: pokemon.name,
+    sprite: getSpriteUrl(pokemon.id, 'artwork'),
+    types: pokemon.types,
+  };
+
   return (
     <div className="animate-fade-in mx-auto max-w-4xl px-4 py-8">
       {/* ── BACK + PREV/NEXT NAV ── */}
@@ -213,6 +228,13 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
           current browsers. No library needed.
           In RN: you'd calculate the hex color manually or use a library.
         */}
+
+        {/*
+          FavoriteButton: positioned absolutely in the top-right corner
+          of the hero section. absolute top-4 right-4 z-20 pins it there
+          and keeps it above other content.
+        */}
+        <FavoriteButton pokemon={favData} className="absolute top-4 right-4 z-20" />
 
         <div className="flex flex-col items-center gap-6 md:flex-row md:gap-10">
           {/* Sprite */}

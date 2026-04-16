@@ -375,6 +375,26 @@ export interface TeamMember {
 }
 
 /**
+ * A Pokémon the user has starred/favorited.
+ * Stored in Redux (with localStorage persistence).
+ *
+ * Intentionally mirrors TeamMember's minimal shape — both store only
+ * what's needed to render a card without re-fetching from PokéAPI.
+ *
+ * addedAt is set by the COMPONENT at dispatch time, not inside the
+ * reducer. Redux reducers should be pure functions (same input → same
+ * output every time), and Date.now() is a side effect that breaks that.
+ * Setting it in the component before dispatch keeps the reducer clean.
+ */
+export interface FavoritePokemon {
+  id: number;
+  name: string; // lowercase ("pikachu")
+  sprite: string; // official artwork URL — getSpriteUrl(id, 'artwork')
+  types: PokemonType[]; // full types array from the Pokémon
+  addedAt: number; // Date.now() — set by component, not reducer
+}
+
+/**
  * Stat name display mapping.
  * PokéAPI uses abbreviations; we want readable names.
  */

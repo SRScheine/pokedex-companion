@@ -57,6 +57,7 @@ import type {Metadata} from 'next';
 import {Press_Start_2P, Inter} from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
+import StoreProvider from '@/components/StoreProvider';
 
 // ============================================================
 // FONT CONFIGURATION
@@ -196,83 +197,98 @@ const RootLayout = ({children}: {children: React.ReactNode}) => {
           We'll build this component in the next step. It will be a
           CLIENT component (uses useState for mobile menu toggle).
         */}
-        <Navbar />
-
         {/*
-          MAIN CONTENT AREA
-          
-          <main> is a semantic HTML element — it tells browsers,
-          search engines, and screen readers "this is the primary
-          content of the page."
-          
-          In React Native, you'd use <View>. On the web, you have
-          semantic elements for different purposes:
-            <header>  → top of page / app bar
-            <nav>     → navigation links
-            <main>    → primary content (use once per page)
-            <section> → a thematic grouping
-            <article> → self-contained content
-            <aside>   → sidebar / supplementary content
-            <footer>  → bottom of page
-          
-          You can use <div> for everything and it works fine, but
-          semantic elements are better for accessibility and SEO.
-          Think of them as <View> with built-in meaning.
-          
-          pt-[var(--nav-height)]: adds padding-top equal to our navbar
-          height so content isn't hidden behind the fixed navbar.
-          This is a CSS variable reference in Tailwind — square bracket
-          notation lets you use arbitrary values: `pt-[64px]` works too.
-          
-          flex-1: makes this area grow to fill remaining vertical space.
-          Same as flex:1 in React Native StyleSheet!
-        */}
-        <main className="flex-1 pt-[var(--nav-height)]">{children}</main>
+          STOREPROVIDER
 
-        {/*
-          FOOTER — simple for now
-          
-          <footer> is another semantic HTML element.
-          In RN you'd render this inside a ScrollView or at the bottom
-          of a screen. On web it just sits at the bottom of the document.
+          Wraps the Navbar, main content, and footer so that all three
+          can access the Redux store. The Navbar needs it for the
+          favorites badge count; pages need it for favorite buttons.
+
+          StoreProvider is a Client Component ("use client"), but the
+          Server Components inside it (pages, layouts) are unaffected —
+          Next.js evaluates them on the server first and passes their
+          output as already-resolved elements. The server work happens
+          regardless of this Provider being client-only.
         */}
-        <footer className="border-pokemon-lightgray mt-8 border-t py-6">
-          <div className="text-pokemon-gray mx-auto max-w-6xl px-4 text-center text-sm">
-            <p>
-              Pokémon Companion — Built with{' '}
-              {/* 
-                ❤️ Next.js note: text nodes with special characters
-                should be wrapped or escaped. The curly brace syntax
-                is how you embed expressions in JSX — same as RN.
-              */}
-              Next.js & PokéAPI
-            </p>
-            <p className="mt-1 text-xs">
-              Data from{' '}
-              {/*
-                <a> tag: the web equivalent of React Native's
-                <Pressable onPress={() => Linking.openURL(url)}>
-                
-                target="_blank": opens in a new tab
-                rel="noopener noreferrer": security best practice
-                  when opening external links in a new tab.
-                  "noopener" prevents the new tab from accessing
-                  your page via window.opener.
-                  "noreferrer" hides the referrer header.
-                  Always use both together for external _blank links.
-              */}
-              <a
-                href="https://pokeapi.co"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-pokemon-blue hover:underline"
-              >
-                PokéAPI
-              </a>{' '}
-              — Not affiliated with Nintendo or The Pokémon Company.
-            </p>
-          </div>
-        </footer>
+        <StoreProvider>
+          <Navbar />
+
+          {/*
+            MAIN CONTENT AREA
+
+            <main> is a semantic HTML element — it tells browsers,
+            search engines, and screen readers "this is the primary
+            content of the page."
+
+            In React Native, you'd use <View>. On the web, you have
+            semantic elements for different purposes:
+              <header>  → top of page / app bar
+              <nav>     → navigation links
+              <main>    → primary content (use once per page)
+              <section> → a thematic grouping
+              <article> → self-contained content
+              <aside>   → sidebar / supplementary content
+              <footer>  → bottom of page
+
+            You can use <div> for everything and it works fine, but
+            semantic elements are better for accessibility and SEO.
+            Think of them as <View> with built-in meaning.
+
+            pt-[var(--nav-height)]: adds padding-top equal to our navbar
+            height so content isn't hidden behind the fixed navbar.
+            This is a CSS variable reference in Tailwind — square bracket
+            notation lets you use arbitrary values: `pt-[64px]` works too.
+
+            flex-1: makes this area grow to fill remaining vertical space.
+            Same as flex:1 in React Native StyleSheet!
+          */}
+          <main className="flex-1 pt-[var(--nav-height)]">{children}</main>
+
+          {/*
+            FOOTER — simple for now
+
+            <footer> is another semantic HTML element.
+            In RN you'd render this inside a ScrollView or at the bottom
+            of a screen. On web it just sits at the bottom of the document.
+          */}
+          <footer className="border-pokemon-lightgray mt-8 border-t py-6">
+            <div className="text-pokemon-gray mx-auto max-w-6xl px-4 text-center text-sm">
+              <p>
+                Pokémon Companion — Built with{' '}
+                {/*
+                  ❤️ Next.js note: text nodes with special characters
+                  should be wrapped or escaped. The curly brace syntax
+                  is how you embed expressions in JSX — same as RN.
+                */}
+                Next.js & PokéAPI
+              </p>
+              <p className="mt-1 text-xs">
+                Data from{' '}
+                {/*
+                  <a> tag: the web equivalent of React Native's
+                  <Pressable onPress={() => Linking.openURL(url)}>
+
+                  target="_blank": opens in a new tab
+                  rel="noopener noreferrer": security best practice
+                    when opening external links in a new tab.
+                    "noopener" prevents the new tab from accessing
+                    your page via window.opener.
+                    "noreferrer" hides the referrer header.
+                    Always use both together for external _blank links.
+                */}
+                <a
+                  href="https://pokeapi.co"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-pokemon-blue hover:underline"
+                >
+                  PokéAPI
+                </a>{' '}
+                — Not affiliated with Nintendo or The Pokémon Company.
+              </p>
+            </div>
+          </footer>
+        </StoreProvider>
       </body>
     </html>
   );
