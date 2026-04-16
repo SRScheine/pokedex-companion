@@ -32,6 +32,14 @@ A full-featured Pokémon reference app built with Next.js App Router, TypeScript
 - Winner selection uses rotation math to guarantee the pointer lands precisely on the center of the chosen slice
 - Pre-loaded with a curated set of favorites; supports adding any of the 1,025 Pokémon via search or random selection
 - Sprite images are preloaded as `HTMLImageElement` objects before being passed to `drawImage()` on the canvas
+- "My Favorites" button to spin exclusively with your starred Pokémon (random sample of 6 if you have > 6)
+
+**Favorites**
+
+- Star/unstar any Pokémon from Pokédex cards, detail pages, or the Spin the Wheel winner modal
+- Dedicated `/favorites` page displays all starred Pokémon in a responsive grid
+- Redux Toolkit for global state management with localStorage persistence across sessions
+- Favorites count badge in the navbar for quick reference
 
 ---
 
@@ -42,6 +50,7 @@ A full-featured Pokémon reference app built with Next.js App Router, TypeScript
 | Framework  | [Next.js 15](https://nextjs.org) — App Router, Server Components, SSG |
 | Language   | TypeScript                                                            |
 | Styling    | Tailwind CSS v4                                                       |
+| State      | [Redux Toolkit](https://redux-toolkit.js.org) — favorites with localStorage persistence |
 | Data       | [PokéAPI](https://pokeapi.co)                                         |
 | Deployment | [Vercel](https://vercel.com)                                          |
 
