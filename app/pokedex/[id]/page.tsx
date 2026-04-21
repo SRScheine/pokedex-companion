@@ -263,7 +263,7 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
 
             {/* Legendary/Mythical badge */}
             {(species?.is_legendary || species?.is_mythical) && (
-              <span className="bg-pokemon-yellow text-pokemon-black absolute top-0 right-0 rounded-full px-2 py-1 text-xs font-bold">
+              <span className="bg-pokemon-black text-pokemon-white absolute -top-4 left-0 rounded-full px-2 py-1 text-xs font-bold">
                 {species.is_mythical ? '✨ Mythical' : '⭐ Legendary'}
               </span>
             )}

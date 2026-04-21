@@ -30,23 +30,58 @@ const PokemonDetailLoading = () => {
         </div>
       </div>
 
-      {/* Stats + info grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      {/* Quick stats row */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        {Array.from({length: 3}).map((_, i) => (
+          <div key={i} className="card text-center">
+            <div className="skeleton mb-2 h-3 w-16 rounded mx-auto" />
+            <div className="skeleton h-4 w-12 rounded mx-auto" />
+          </div>
+        ))}
+      </div>
+
+      {/* Base stats + Type defenses + Abilities */}
+      <div className="mb-6 flex flex-col gap-6">
+        {/* Base Stats card */}
         <div className="card">
           <div className="skeleton mb-4 h-5 w-24 rounded" />
-          {Array.from({length: 6}).map((_, i) => (
-            <div key={i} className="mb-3 flex items-center gap-3">
-              <div className="skeleton h-3 w-16 rounded" />
-              <div className="skeleton h-3 w-8 rounded" />
-              <div className="skeleton h-2 flex-1 rounded-full" />
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+            {/* StatRadar placeholder (circle) */}
+            <div className="flex-[4]">
+              <div className="skeleton h-48 w-48 rounded-full mx-auto" />
             </div>
-          ))}
+            {/* StatTable placeholder (list) */}
+            <div className="flex-[2]">
+              {Array.from({length: 6}).map((_, i) => (
+                <div key={i} className="mb-2 flex items-center gap-2">
+                  <div className="skeleton h-3 w-12 rounded" />
+                  <div className="skeleton h-3 flex-1 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
+        {/* Type defenses placeholder */}
         <div className="card">
-          <div className="skeleton mb-4 h-5 w-24 rounded" />
-          {Array.from({length: 4}).map((_, i) => (
-            <div key={i} className="skeleton mb-2 h-8 w-full rounded" />
-          ))}
+          <div className="skeleton mb-4 h-5 w-32 rounded" />
+          <div className="skeleton h-40 w-full rounded" />
+        </div>
+
+        {/* Abilities + Training grid */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="card">
+            <div className="skeleton mb-3 h-5 w-20 rounded" />
+            {Array.from({length: 3}).map((_, i) => (
+              <div key={i} className="skeleton mb-2 h-8 w-full rounded" />
+            ))}
+          </div>
+          <div className="card">
+            <div className="skeleton mb-3 h-5 w-20 rounded" />
+            {Array.from({length: 3}).map((_, i) => (
+              <div key={i} className="skeleton mb-2 h-8 w-full rounded" />
+            ))}
+          </div>
         </div>
       </div>
     </div>

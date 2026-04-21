@@ -62,8 +62,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {Metadata} from 'next';
-import {getSpriteUrl} from '@/lib/api';
-import {Pokemon} from '@/types/pokemon';
+import {getSpriteUrl, getPokemonWithSpecies, getEnglishFlavorText, getPokemon} from '@/lib/api';
+import {getPokemonOfTheDayIds} from '@/lib/pokemonOfTheDay';
+import {PokemonTypeName} from '@/types/pokemon';
+import TypeBadge from '@/components/TypeBadge';
 
 export const metadata: Metadata = {
   title: 'Home | Pokémon Companion',
@@ -116,14 +118,12 @@ const HomePage = async () => {
     In React Native you needed useEffect + useState for this.
     Here: one line, runs on the server, user gets data immediately.
   */
-  const featuredPokemon = await Promise.all(
-    FEATURED_IDS.map(async (id) => {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
-        cache: 'force-cache',
-      });
-      return res.json() as Promise<Pokemon>;
-    })
-  );
+  const pokemonOfTheDayIds = getPokemonOfTheDayIds();
+
+  const [featuredPokemon, pokemonOfTheDay] = await Promise.all([
+    Promise.all(FEATURED_IDS.map((id) => getPokemon(id))),
+    Promise.all(pokemonOfTheDayIds.map((id) => getPokemonWithSpecies(id))),
+  ]);
 
   return (
     <div className="animate-fade-in">
@@ -157,7 +157,7 @@ const HomePage = async () => {
                 */}
                 <Link
                   href="/pokedex"
-                  className="bg-pokemon-yellow text-pokemon-black inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-colors duration-200 hover:bg-yellow-300"
+                  className="bg-pokemon-yellow inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold !text-black transition-colors duration-200 hover:bg-yellow-300"
                 >
                   Open Pokédex →
                 </Link>
@@ -178,30 +178,33 @@ const HomePage = async () => {
             */}
             <div className="hidden flex-shrink-0 md:block">
               <div className="grid grid-cols-3 gap-2">
-                {featuredPokemon.map((pokemon) => (
-                  <Link
-                    key={pokemon.id}
-                    href={`/pokedex/${pokemon.id}`}
-                    className="rounded-xl bg-white/10 p-3 text-center transition-colors duration-200 hover:bg-white/20"
-                  >
-                    {/*
+                {featuredPokemon.map(
+                  (pokemon) =>
+                    pokemon && (
+                      <Link
+                        key={pokemon.id}
+                        href={`/pokedex/${pokemon.id}`}
+                        className="rounded-xl bg-white/10 p-3 text-center transition-colors duration-200 hover:bg-white/20"
+                      >
+                        {/*
                       next/image <Image>:
                       In RN: <Image source={{ uri: url }} style={{ width, height }} />
                       On web: <Image src={url} width={n} height={n} alt="..." />
                       alt is REQUIRED on web for accessibility. width+height
                       prevent layout shift while the image loads.
                     */}
-                    <Image
-                      src={getSpriteUrl(pokemon.id)}
-                      width={64}
-                      height={64}
-                      alt={pokemon.name}
-                      unoptimized
-                      className="mx-auto"
-                    />
-                    <p className="mt-1 text-xs text-white/80 capitalize">{pokemon.name}</p>
-                  </Link>
-                ))}
+                        <Image
+                          src={getSpriteUrl(pokemon.id)}
+                          width={64}
+                          height={64}
+                          alt={pokemon.name}
+                          unoptimized
+                          className="mx-auto"
+                        />
+                        <p className="mt-1 text-xs text-white/80 capitalize">{pokemon.name}</p>
+                      </Link>
+                    )
+                )}
               </div>
             </div>
           </div>
@@ -218,7 +221,7 @@ const HomePage = async () => {
           Single column on mobile, two columns on tablet, three on desktop.
           The most common responsive card grid pattern on the web.
         */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             /*
               `group` enables child elements to react to the parent's
@@ -242,6 +245,66 @@ const HomePage = async () => {
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* ── POKÉMON OF THE DAY (3 CARDS) ── */}
+      <section className="mx-auto max-w-6xl px-4 py-8">
+        <h2 className="text-pokemon-black mb-6 font-[family-name:var(--font-pixel)] text-lg">Featured Pokémon</h2>
+        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {pokemonOfTheDay.map(([pokemon, species]) => {
+            if (!pokemon) return null;
+            const primaryType = pokemon.types[0]?.type.name;
+            const genus = species?.genera?.find(
+              (g: {language: {name: string}; genus: string}) => g.language.name === 'en'
+            )?.genus;
+
+            return (
+              <Link
+                key={pokemon.id}
+                href={`/pokedex/${pokemon.id}`}
+                className="group card hover:shadow-card-hover flex h-88 flex-col items-center overflow-hidden px-4 pt-6 text-center transition-all duration-200 hover:-translate-y-1"
+              >
+                {/* Sprite with type-colored ring */}
+                <div className="relative mb-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110">
+                  <div className={`absolute inset-0 bg-type-${primaryType} -m-4 rounded-full opacity-20`} />
+                  <Image
+                    src={getSpriteUrl(pokemon.id)}
+                    width={100}
+                    height={100}
+                    alt={pokemon.name}
+                    unoptimized
+                    className="relative z-10"
+                  />
+                </div>
+
+                {/* Info section */}
+                <h3 className="text-pokemon-black mb-1 flex-shrink-0 font-[family-name:var(--font-pixel)] text-base capitalize">
+                  {pokemon.name}
+                </h3>
+                {genus && <p className="text-pokemon-gray mb-3 flex-shrink-0 text-xs">{genus}</p>}
+
+                {/* Badges + ID grouped below genus */}
+                <div className="mt-1 flex w-full flex-shrink-0 flex-col items-center gap-1">
+                  <div className="flex flex-wrap justify-center gap-1">
+                    {pokemon.types.map((typeObj: {type: {name: string}}) => (
+                      <TypeBadge key={typeObj.type.name} typeName={typeObj.type.name as PokemonTypeName} />
+                    ))}
+                  </div>
+                  <p className="text-pokemon-gray text-xs">#{pokemon.id.toString().padStart(4, '0')}</p>
+                </div>
+
+                {/* Flavor text - centered vertically, taking remaining space */}
+                {species?.flavor_text_entries && (
+                  <div className="mt-2 flex flex-1 items-center justify-center overflow-hidden">
+                    <p className="text-pokemon-gray line-clamp-5 text-xs leading-relaxed">
+                      {getEnglishFlavorText(species.flavor_text_entries)}
+                    </p>
+                  </div>
+                )}
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>

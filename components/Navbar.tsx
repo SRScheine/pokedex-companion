@@ -212,13 +212,7 @@ const Navbar = () => {
             /public/pokeball.png → accessible at /pokeball.png
             We'll add this image to /public later.
           */}
-          <Image
-            src="/pokeball.png"
-            width={32}
-            height={32}
-            alt="Pokéball logo"
-            className="animate-spin-slow" // Too distracting?
-          />
+          <Image src="/pokeball.png" width={32} height={32} alt="Pokéball logo" />
           {/*
             font-[family-name:var(--font-pixel)]
               → Uses our pixel font CSS variable for the logo text
