@@ -62,38 +62,51 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {Metadata} from 'next';
-import {capitalize, formatPokemonId, getSpriteUrl} from '@/lib/api';
+import {getSpriteUrl} from '@/lib/api';
 import {Pokemon} from '@/types/pokemon';
-import TypeBadge from '@/components/TypeBadge';
 
 export const metadata: Metadata = {
   title: 'Home | Pokémon Companion',
-  description: "Your Pokémon Let's Go Pikachu companion.",
+  description: "Your Pokémon Companion — look up moves, plan your team, and master type matchups.",
 };
 
 const FEATURED_IDS = [1, 4, 7, 25, 133, 52];
 
-const QUICK_LINKS = [
+const FEATURES = [
   {
     href: '/pokedex',
     emoji: '📖',
     title: 'Pokédex',
-    description: 'Look up any of the 151 original Pokémon. Stats, moves, evolutions and more.',
+    description: 'Browse all 1025 Pokémon with full stats, moves, and evolution details.',
     color: 'bg-pokemon-red',
   },
   {
     href: '/type',
     emoji: '⚔️',
     title: 'Type Chart',
-    description: 'Check type matchups mid-battle. Know your weaknesses before they do.',
+    description: 'Master matchups with a complete type effectiveness reference.',
     color: 'bg-pokemon-blue',
   },
   {
     href: '/team',
     emoji: '⭐',
-    title: 'My Team',
-    description: 'Build and save your dream team. Plan your party before catching.',
+    title: 'Team Builder',
+    description: 'Create and save your dream team with type coverage analysis.',
     color: 'bg-pokemon-gold',
+  },
+  {
+    href: '/favorites',
+    emoji: '❤️',
+    title: 'Favorites',
+    description: 'Save your favorite Pokémon for quick access later.',
+    color: 'bg-purple-500',
+  },
+  {
+    href: '/spin',
+    emoji: '🎡',
+    title: 'Spin the Wheel',
+    description: 'Discover a random Pokémon or relive classic team lineups.',
+    color: 'bg-pink-500',
   },
 ];
 
@@ -132,7 +145,7 @@ const HomePage = async () => {
               <h1 className="text-pokemon-yellow mb-4 font-[family-name:var(--font-pixel)] text-2xl leading-relaxed md:text-3xl">
                 PokéCompanion
               </h1>
-              <p className="mb-2 text-lg text-white/90 md:text-xl">Your Let&apos;s Go Pikachu field guide.</p>
+              <p className="mb-2 text-lg text-white/90 md:text-xl">Your Pokémon companion for any adventure.</p>
               <p className="mb-8 text-base text-white/70">
                 Look up Pokémon, plan your team, and master type matchups — all while playing with your little trainer.
               </p>
@@ -201,12 +214,12 @@ const HomePage = async () => {
           Where to?
         </h2>
         {/*
-          grid grid-cols-1 md:grid-cols-3:
-          Single column on mobile, three columns on desktop.
+          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3:
+          Single column on mobile, two columns on tablet, three on desktop.
           The most common responsive card grid pattern on the web.
         */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {QUICK_LINKS.map((link) => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((feature) => (
             /*
               `group` enables child elements to react to the parent's
               hover state using group-hover: prefix classes.
@@ -214,107 +227,24 @@ const HomePage = async () => {
               On web, CSS handles it natively.
             */
             <Link
-              key={link.href}
-              href={link.href}
+              key={feature.href}
+              href={feature.href}
               className="group card hover:shadow-card-hover transition-all duration-200"
             >
               <div className="transform transition-transform duration-200 group-hover:-translate-y-1">
                 <div
-                  className={`h-12 w-12 ${link.color} mb-4 flex items-center justify-center rounded-xl text-2xl transition-transform duration-200 group-hover:scale-110`}
+                  className={`h-12 w-12 ${feature.color} mb-4 flex items-center justify-center rounded-xl text-2xl transition-transform duration-200 group-hover:scale-110`}
                 >
-                  {link.emoji}
+                  {feature.emoji}
                 </div>
-                <h3 className="text-pokemon-black mb-2 text-lg font-semibold">{link.title}</h3>
-                <p className="text-pokemon-gray text-sm leading-relaxed">{link.description}</p>
+                <h3 className="text-pokemon-black mb-2 text-lg font-semibold">{feature.title}</h3>
+                <p className="text-pokemon-gray text-sm leading-relaxed">{feature.description}</p>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* ── HORIZONTAL SCROLL STRIP — mobile only ── */}
-      {/*
-        md:hidden: only visible on mobile screens.
-        overflow-x-auto + flex = horizontal ScrollView equivalent.
-        flex-shrink-0 on each item prevents squishing — without it
-        items compress instead of creating a scrollable overflow.
-        In RN: <ScrollView horizontal> handles all of this automatically.
-      */}
-      <section className="border-pokemon-lightgray border-t bg-white py-6 md:hidden">
-        <div className="mb-4 px-4">
-          <h2 className="text-pokemon-black font-[family-name:var(--font-pixel)] text-sm">Quick Look</h2>
-        </div>
-        <div className="scrollbar-hide overflow-x-auto">
-          <div className="flex gap-3 px-4 pb-2">
-            {featuredPokemon.map((pokemon) => (
-              <Link
-                key={pokemon.id}
-                href={`/pokedex/${pokemon.id}`}
-                className="bg-pokemon-lightgray w-24 flex-shrink-0 rounded-xl p-3 text-center transition-colors hover:bg-gray-200"
-              >
-                <Image
-                  src={getSpriteUrl(pokemon.id)}
-                  width={56}
-                  height={56}
-                  alt={pokemon.name}
-                  unoptimized
-                  className="mx-auto"
-                />
-                <p className="text-pokemon-black mt-1 text-xs font-medium capitalize">{pokemon.name}</p>
-                <p className="text-pokemon-gray text-xs">{formatPokemonId(pokemon.id)}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── STARTER CARDS ── */}
-      <section className="border-pokemon-lightgray mx-auto max-w-6xl border-t px-4 py-10">
-        <h2 className="text-pokemon-black mb-6 text-center font-[family-name:var(--font-pixel)] text-lg md:text-left">
-          Starter Guide
-        </h2>
-        {/*
-          Three breakpoints in one line:
-          2 cols mobile → 3 cols tablet → 6 cols desktop.
-          In RN this would require Dimensions checks or a library.
-        */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-          {featuredPokemon.map((pokemon) => (
-            <Link
-              key={pokemon.id}
-              href={`/pokedex/${pokemon.id}`}
-              className="card hover:shadow-card-hover text-center transition-shadow duration-200"
-            >
-              <Image
-                src={getSpriteUrl(pokemon.id, 'artwork')}
-                width={96}
-                height={96}
-                alt={pokemon.name}
-                unoptimized
-                className="mx-auto mb-2"
-              />
-              <p className="text-pokemon-gray mb-1 text-xs">{formatPokemonId(pokemon.id)}</p>
-              <p className="text-pokemon-black mb-2 font-semibold capitalize">{capitalize(pokemon.name)}</p>
-              <div className="flex flex-wrap justify-center gap-1">
-                {pokemon.types.map(({type}) => (
-                  <TypeBadge key={type.name} typeName={type.name} size="sm" />
-                ))}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── TIP BANNER ── */}
-      <section className="bg-pokemon-blue mt-4 py-8 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center px-4 text-center">
-          <p className="mb-2 text-sm font-medium tracking-widest text-white/70 uppercase">Let&apos;s Go Tip</p>
-          <p className="mx-auto max-w-2xl text-lg font-medium">
-            💡 In Let&apos;s Go, you can lure Pokémon with Berries before throwing. A Razz Berry raises your catch rate
-            — great for rare Pokémon!
-          </p>
-        </div>
-      </section>
     </div>
   );
 };

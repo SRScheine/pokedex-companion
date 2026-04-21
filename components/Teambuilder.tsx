@@ -63,7 +63,7 @@
   This pattern comes up constantly in Next.js — learn it well.
 */
 
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect, useCallback, useRef} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {TeamMember} from '@/types/pokemon';
@@ -102,6 +102,15 @@ const TeamBuilder = () => {
   // Which team slot is being edited (for nicknaming)
   const [editingNickname, setEditingNickname] = useState<number | null>(null);
   const [nicknameInput, setNicknameInput] = useState('');
+
+  // Clear team confirmation state
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Adding to team state (for loading indicator)
+  const [isAdding, setIsAdding] = useState(false);
+
+  // Ref to search input for focusing when clicking empty slots
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // ============================================================
   // LOAD FROM localStorage ON MOUNT
@@ -178,28 +187,33 @@ const TeamBuilder = () => {
     if (team.length >= MAX_TEAM_SIZE) return;
     if (team.some((m) => m.id === pokemonId)) return; // Already on team
 
-    // Fetch full Pokémon data for types and sprite
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`, {
-      cache: 'force-cache',
-    });
-    const data = await res.json();
+    setIsAdding(true);
+    try {
+      // Fetch full Pokémon data for types and sprite
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`, {
+        cache: 'force-cache',
+      });
+      const data = await res.json();
 
-    const newMember: TeamMember = {
-      id: pokemonId,
-      name,
-      sprite: getSpriteUrl(pokemonId),
-      types: data.types.map((t: any) => t.type.name),
-      addedAt: Date.now(),
-    };
+      const newMember: TeamMember = {
+        id: pokemonId,
+        name,
+        sprite: getSpriteUrl(pokemonId),
+        types: data.types.map((t: any) => t.type.name),
+        addedAt: Date.now(),
+      };
 
-    /*
-      Functional state update: (prev) => [...prev, newMember]
-      Always use the functional form when new state depends on old state.
-      Same rule in RN and web — this avoids stale closure issues.
-    */
-    setTeam((prev) => [...prev, newMember]);
-    setSearchQuery('');
-    setSearchResults([]);
+      /*
+        Functional state update: (prev) => [...prev, newMember]
+        Always use the functional form when new state depends on old state.
+        Same rule in RN and web — this avoids stale closure issues.
+      */
+      setTeam((prev) => [...prev, newMember]);
+      setSearchQuery('');
+      setSearchResults([]);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const removeFromTeam = (pokemonId: number) => {
@@ -314,10 +328,11 @@ const TeamBuilder = () => {
                       setEditingNickname(member.id);
                       setNicknameInput(member.nickname ?? '');
                     }}
-                    className="text-pokemon-black hover:text-pokemon-red text-xs font-medium capitalize transition-colors"
+                    className="text-pokemon-black hover:text-pokemon-red flex items-center gap-1 text-xs font-medium capitalize transition-colors group/nickname"
                     title="Click to add nickname"
                   >
                     {member.nickname ?? capitalize(member.name)}
+                    <span className="text-pokemon-gray group-hover/nickname:text-pokemon-red text-2xs transition-colors">✏</span>
                   </button>
                 )}
 
@@ -336,13 +351,14 @@ const TeamBuilder = () => {
 
           // Empty slot
           return (
-            <div
+            <button
               key={`empty-${index}`}
-              className="border-pokemon-lightgray text-pokemon-gray flex h-32 flex-col items-center justify-center rounded-2xl border-2 border-dashed"
+              onClick={() => searchInputRef.current?.focus()}
+              className="border-pokemon-lightgray bg-pokemon-lightgray/30 text-pokemon-gray hover:border-pokemon-lightgray/80 card border-2 border-dashed flex flex-col items-center justify-center transition-colors hover:bg-pokemon-lightgray/50 cursor-pointer"
             >
               <span className="mb-1 text-2xl opacity-30">+</span>
               <span className="text-xs opacity-50">Empty</span>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -350,25 +366,35 @@ const TeamBuilder = () => {
       {/* ── TEAM SUMMARY ── */}
       {team.length > 0 && (
         <div className="card bg-pokemon-lightgray/50 mb-8">
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <h2 className="text-pokemon-black font-semibold">Team Summary</h2>
-            <button
-              onClick={() => {
-                /*
-                  window.confirm(): a browser-native confirmation dialog.
-                  Blocks JavaScript execution until the user responds.
-                  In RN: you'd use Alert.alert() — same concept.
-                  On web: window.confirm() is the quick-and-dirty version.
-                  For production apps you'd build a custom modal instead.
-                */
-                if (window.confirm('Clear your entire team?')) {
-                  setTeam([]);
-                }
-              }}
-              className="text-pokemon-gray hover:text-pokemon-red text-xs transition-colors"
-            >
-              Clear team
-            </button>
+            {!showClearConfirm ? (
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                className="text-pokemon-gray hover:text-pokemon-red text-xs transition-colors"
+              >
+                Clear team
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <span className="text-pokemon-black text-xs">Clear team?</span>
+                <button
+                  onClick={() => {
+                    setTeam([]);
+                    setShowClearConfirm(false);
+                  }}
+                  className="text-pokemon-red hover:text-pokemon-darkred text-xs font-semibold transition-colors"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="text-pokemon-gray hover:text-pokemon-black text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex flex-wrap gap-2">
             {/* All types on the team */}
@@ -392,6 +418,7 @@ const TeamBuilder = () => {
           <div className="relative mb-4">
             <span className="text-pokemon-gray pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">🔍</span>
             <input
+              ref={searchInputRef}
               type="search"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
@@ -415,8 +442,8 @@ const TeamBuilder = () => {
                 return (
                   <button
                     key={result.id}
-                    onClick={() => !isOnTeam && addToTeam(result.id, result.name)}
-                    disabled={isOnTeam}
+                    onClick={() => !isOnTeam && !isAdding && addToTeam(result.id, result.name)}
+                    disabled={isOnTeam || isAdding}
                     /*
                       disabled: the HTML attribute for non-interactive buttons.
                       In RN: disabled prop on TouchableOpacity/Pressable.
@@ -434,6 +461,7 @@ const TeamBuilder = () => {
                     </span>
                     <span className="text-2xs text-pokemon-gray">{formatPokemonId(result.id)}</span>
                     {isOnTeam && <span className="text-2xs text-pokemon-red mt-0.5 font-medium">On team</span>}
+                    {isAdding && <span className="text-2xs text-pokemon-yellow mt-0.5 font-medium">Adding…</span>}
                   </button>
                 );
               })}
@@ -444,9 +472,9 @@ const TeamBuilder = () => {
           <p className="text-pokemon-gray mt-4 text-center text-xs">
             Or{' '}
             <Link href="/pokedex" className="text-pokemon-blue hover:underline">
-              browse the Pokédex
-            </Link>{' '}
-            and add from there.
+              find a Pokémon in the Pokédex
+            </Link>
+            .
           </p>
         </div>
       )}
@@ -457,6 +485,12 @@ const TeamBuilder = () => {
           <p className="mb-2 text-2xl">🎉</p>
           <p className="text-pokemon-black font-medium">Team complete!</p>
           <p className="mt-1 text-sm">You have a full party of 6.</p>
+          <Link
+            href="/type"
+            className="text-pokemon-blue hover:text-pokemon-red mt-3 inline-block text-xs font-semibold transition-colors"
+          >
+            Check type coverage →
+          </Link>
         </div>
       )}
     </div>

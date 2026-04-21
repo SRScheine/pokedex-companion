@@ -29,7 +29,7 @@ import TeamBuilder from '@/components/Teambuilder';
 
 export const metadata: Metadata = {
   title: 'My Team',
-  description: "Build and save your Pokémon Let's Go team.",
+  description: "Build and save your Pokémon team.",
 };
 
 // Skeleton shown while TeamBuilder hydrates
@@ -61,7 +61,7 @@ const TeamPage = () => {
       <div className="mb-8">
         <h1 className="text-pokemon-black mb-2 font-[family-name:var(--font-pixel)] text-xl md:text-2xl">My Team</h1>
         <p className="text-pokemon-gray text-sm">
-          Build your party for Let&apos;s Go Pikachu. Your team is saved in your browser automatically.
+          Build your party for any Pokémon adventure. Your team is saved in your browser automatically.
         </p>
       </div>
 

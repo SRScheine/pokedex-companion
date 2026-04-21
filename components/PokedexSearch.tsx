@@ -223,7 +223,7 @@ const PokedexSearch = () => {
             In RN: focus styles are handled by the native OS.
         */}
         <input
-          type="search"
+          type="text"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -282,13 +282,10 @@ const PokedexSearch = () => {
               type="button"
               onClick={() => {
                 /*
-                  On suggestion click: update the input, clear the dropdown,
-                  and navigate to the search results page for that name.
-                  Using router.push keeps this client-side (no full reload).
+                  On suggestion click: go directly to the Pokémon detail page.
+                  This skips the search results page entirely — more direct UX.
                 */
-                setQuery(s.name);
-                setSuggestions([]);
-                router.push(`/pokedex?search=${s.name}`);
+                router.push(`/pokedex/${s.id}`);
               }}
               className="border-pokemon-lightgray hover:bg-pokemon-lightgray flex w-full items-center gap-3 border-b px-4 py-2.5 text-left transition-colors last:border-0"
             >

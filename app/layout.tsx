@@ -110,7 +110,7 @@ export const metadata: Metadata = {
     default: 'Pokémon Companion',
   },
   description:
-    "Your pocket companion for Pokémon Let's Go Pikachu. Look up Pokémon, plan your team, and master type matchups.",
+    'Your pocket companion for the Pokémon video games. Look up Pokémon, plan your team, and master type matchups.',
   // Icons: the favicon (the little icon in browser tabs)
   icons: {
     icon: '/favicon.ico',
