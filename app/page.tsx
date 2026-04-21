@@ -67,7 +67,7 @@ import {Pokemon} from '@/types/pokemon';
 
 export const metadata: Metadata = {
   title: 'Home | Pokémon Companion',
-  description: "Your Pokémon Companion — look up moves, plan your team, and master type matchups.",
+  description: 'Your Pokémon Companion — look up moves, plan your team, and master type matchups.',
 };
 
 const FEATURED_IDS = [1, 4, 7, 25, 133, 52];
@@ -147,9 +147,9 @@ const HomePage = async () => {
               </h1>
               <p className="mb-2 text-lg text-white/90 md:text-xl">Your Pokémon companion for any adventure.</p>
               <p className="mb-8 text-base text-white/70">
-                Look up Pokémon, plan your team, and master type matchups — all while playing with your little trainer.
+                Look up Pokémon, plan your team, and master type matchups — all in one place!
               </p>
-              <div className="flex flex-wrap justify-center gap-3 md:justify-start">
+              <div className="mt-2 flex flex-wrap justify-center gap-3 md:justify-start">
                 {/*
                   <Link> = internal navigation (like navigation.navigate())
                   <a>    = external links (other websites)
@@ -244,7 +244,6 @@ const HomePage = async () => {
           ))}
         </div>
       </section>
-
     </div>
   );
 };
