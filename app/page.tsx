@@ -72,6 +72,8 @@ export const metadata: Metadata = {
   description: 'Your Pokémon Companion — look up moves, plan your team, and master type matchups.',
 };
 
+export const revalidate = 28800; // Revalidate every 8 hours
+
 const FEATURED_IDS = [1, 4, 7, 25, 133, 52];
 
 const FEATURES = [
@@ -251,7 +253,7 @@ const HomePage = async () => {
       {/* ── POKÉMON OF THE DAY (3 CARDS) ── */}
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h2 className="text-pokemon-black mb-6 font-[family-name:var(--font-pixel)] text-lg">Featured Pokémon</h2>
-        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-3">
           {pokemonOfTheDay.map(([pokemon, species]) => {
             if (!pokemon) return null;
             const primaryType = pokemon.types[0]?.type.name;

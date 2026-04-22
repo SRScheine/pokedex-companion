@@ -58,6 +58,7 @@ import {Press_Start_2P, Inter} from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import StoreProvider from '@/components/StoreProvider';
+import ScrollToTop from '@/components/ScrollToTop';
 
 // ============================================================
 // FONT CONFIGURATION
@@ -211,6 +212,7 @@ const RootLayout = ({children}: {children: React.ReactNode}) => {
           regardless of this Provider being client-only.
         */}
         <StoreProvider>
+          <ScrollToTop />
           <Navbar />
 
           {/*

@@ -57,8 +57,8 @@ const MAX_SLOTS = 6;
 const MIN_TO_SPIN = 2;
 const SPIN_DURATION = 2500; // ms
 
-// Ben's favorites — Bulbasaur, Charmander, Squirtle, Eevee, Jolteon, Pansage
-const BENS_FAVORITES_IDS = [1, 4, 7, 133, 135, 511];
+// Ben's favorites — Bulbasaur, Charmander, Squirtle, Eevee, Jolteon, Sandshrew
+const BENS_FAVORITES_IDS = [1, 4, 7, 133, 135, 27];
 
 // Type → hex color for canvas slice fills
 const TYPE_COLORS: Record<string, string> = {
@@ -628,7 +628,7 @@ const SpinWheel = () => {
           onClick={loadMyFavorites}
           disabled={!canLoadMyFavorites || isSpinning}
           title={!canLoadMyFavorites ? `Star at least ${MIN_TO_SPIN} Pokémon to use this` : undefined}
-          className="bg-pokemon-red flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition-colors hover:bg-pokemon-darkred disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-pokemon-red hover:bg-pokemon-darkred flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition-colors disabled:cursor-not-allowed disabled:opacity-50"
         >
           <StarIcon size={14} filled />
           My Favorites

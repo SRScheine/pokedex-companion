@@ -235,7 +235,12 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
           and keeps it above other content.
         */}
         <FavoriteButton pokemon={favData} className="absolute top-4 right-4 z-20" />
-
+        {/* Legendary/Mythical badge */}
+        {(species?.is_legendary || species?.is_mythical) && (
+          <span className="bg-pokemon-black text-pokemon-white absolute top-4 left-4 rounded-full px-2 py-1 text-xs font-bold">
+            {species.is_mythical ? '✨ Mythical' : '⭐ Legendary'}
+          </span>
+        )}
         <div className="flex flex-col items-center gap-6 md:flex-row md:gap-10">
           {/* Sprite */}
           <div className="relative flex-shrink-0">
@@ -260,13 +265,6 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
               */
               className="drop-shadow-lg"
             />
-
-            {/* Legendary/Mythical badge */}
-            {(species?.is_legendary || species?.is_mythical) && (
-              <span className="bg-pokemon-black text-pokemon-white absolute -top-4 left-0 rounded-full px-2 py-1 text-xs font-bold">
-                {species.is_mythical ? '✨ Mythical' : '⭐ Legendary'}
-              </span>
-            )}
           </div>
 
           {/* Info */}
