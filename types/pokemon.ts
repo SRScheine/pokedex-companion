@@ -362,6 +362,24 @@ export interface Move {
    ============================================================ */
 
 /**
+ * A move entry enriched with battle stats.
+ * Combines the raw move name/url/learn-method from the Pokémon endpoint
+ * with type, damage class, power, and accuracy fetched from the /move endpoint.
+ * For TM moves, includes the actual TM number from the machine data.
+ */
+export interface MoveEntry {
+  name: string;
+  url: string;
+  learnMethod: string; // "level-up" | "machine" | "egg" | "tutor"
+  level: number; // 0 for non-level-up moves
+  type: string; // e.g. "ghost", "poison"
+  damageClass: string; // "physical" | "special" | "status"
+  power: number | null; // null for status moves (e.g. Hypnosis, Growl)
+  accuracy: number | null; // null for moves that bypass accuracy (e.g. Swift)
+  tmNumber?: number; // TM number for machine moves (e.g. 1 for TM01)
+}
+
+/**
  * A Pokémon on the user's team.
  * We store minimal data in localStorage and fetch details as needed.
  */
@@ -445,19 +463,5 @@ export const POKEMON_TYPES = [
  * Now TypeScript will error if you pass "fyre" instead of "fire".
  */
 export type PokemonTypeName = (typeof POKEMON_TYPES)[number];
-
-/**
- * Let's Go Pikachu version group identifier used in PokéAPI.
- * We'll filter moves and flavor text to this version.
- */
-export const LETS_GO_VERSION_GROUP = 'lets-go-pikachu-lets-go-eevee';
-export const LETS_GO_VERSION = 'lets-go-pikachu';
-
-/**
- * The 151 original Pokémon are in Let's Go Pikachu.
- * We'll use this to limit our Pokédex to the relevant range.
- * (Plus Meltan #808 and Melmetal #809, but we'll keep it simple)
- */
-export const LETS_GO_MAX_POKEMON = 151;
 
 export const TOTAL_POKEMON = 1025;

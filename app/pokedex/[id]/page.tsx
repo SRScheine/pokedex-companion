@@ -63,8 +63,6 @@ import {
   getEvolutionChain,
   flattenEvolutionChain,
   getEnglishFlavorText,
-  getLetsGoMoves,
-  getAllMoves,
   capitalize,
   formatPokemonId,
   formatHeight,
@@ -72,7 +70,7 @@ import {
   getSpriteUrl,
   formatName,
 } from '@/lib/api';
-import {LETS_GO_MAX_POKEMON, TOTAL_POKEMON} from '@/types/pokemon';
+import {TOTAL_POKEMON} from '@/types/pokemon';
 import type {FavoritePokemon} from '@/types/pokemon';
 import TypeBadge from '@/components/TypeBadge';
 import StatRadar from '@/components/StatRadar';
@@ -140,22 +138,6 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
   const evolutions = evolutionChain ? flattenEvolutionChain(evolutionChain.chain) : [];
 
   const flavorText = species ? getEnglishFlavorText(species.flavor_text_entries) : '';
-
-  /*
-  Fetch both move sets — the server passes both to PokemonDetailClient.
-  The client component picks which to display based on the Gen 1 toggle.
-  We can't read localStorage here (server-side) so we pass both and
-  let the client decide.
-*/
-  const letsGoMoves = getLetsGoMoves(pokemon);
-  const allMoves = getAllMoves(pokemon);
-  const letsGoLevelUpMoves = letsGoMoves.filter((m) => m.learnMethod === 'level-up');
-  const letsGoTmMoves = letsGoMoves.filter((m) => m.learnMethod === 'machine');
-  const allLevelUpMoves = allMoves.filter((m) => m.learnMethod === 'level-up');
-  const allTmMoves = allMoves.filter((m) => m.learnMethod === 'machine');
-
-  // Whether this Pokémon is Gen 1 — determines if toggle is shown
-  const isGen1 = pokemon.id <= LETS_GO_MAX_POKEMON;
 
   // Navigation: previous and next Pokémon — now spans full dex
   const prevId = pokemon.id > 1 ? pokemon.id - 1 : null;
@@ -392,11 +374,7 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
       <PokemonDetailClient
         pokemonId={pokemon.id}
         evolutions={evolutions}
-        letsGoLevelUpMoves={letsGoLevelUpMoves}
-        letsGoTmMoves={letsGoTmMoves}
-        allLevelUpMoves={allLevelUpMoves}
-        allTmMoves={allTmMoves}
-        isGen1={isGen1}
+        rawMoves={pokemon.moves}
       />
     </div>
   );

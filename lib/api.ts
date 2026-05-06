@@ -81,8 +81,9 @@ import {
   EvolutionDetail,
   PokemonTypeData,
   Move,
+  MoveEntry,
+  PokemonMove,
   TOTAL_POKEMON,
-  LETS_GO_VERSION_GROUP,
   FlavorTextEntry,
 } from '@/types/pokemon';
 
@@ -484,89 +485,6 @@ export const getMove = async (nameOrId: string | number): Promise<Move | null> =
   }
 };
 
-/**
- * Get moves for a Pokémon filtered to Let's Go Pikachu.
- *
- * PokéAPI returns moves for EVERY game a Pokémon has appeared in.
- * We filter to only moves available in Let's Go.
- *
- * Returns a sorted list: level-up moves first (sorted by level),
- * then TM moves.
- */
-export const getLetsGoMoves = (
-  pokemon: Pokemon
-): Array<{name: string; url: string; learnMethod: string; level: number}> => {
-  const letsGoMoves: Array<{
-    name: string;
-    url: string;
-    learnMethod: string;
-    level: number;
-  }> = [];
-
-  for (const moveEntry of pokemon.moves) {
-    // Find the Let's Go version group detail for this move
-    const letsGoDetail = moveEntry.version_group_details.find(
-      (detail) => detail.version_group.name === LETS_GO_VERSION_GROUP
-    );
-
-    if (letsGoDetail) {
-      letsGoMoves.push({
-        name: moveEntry.move.name,
-        url: moveEntry.move.url,
-        learnMethod: letsGoDetail.move_learn_method.name,
-        level: letsGoDetail.level_learned_at,
-      });
-    }
-  }
-
-  // Sort: level-up moves first (sorted by level), then others alphabetically
-  return letsGoMoves.sort((a, b) => {
-    if (a.learnMethod === 'level-up' && b.learnMethod !== 'level-up') return -1;
-    if (a.learnMethod !== 'level-up' && b.learnMethod === 'level-up') return 1;
-    if (a.learnMethod === 'level-up' && b.learnMethod === 'level-up') {
-      return a.level - b.level;
-    }
-    return a.name.localeCompare(b.name);
-  });
-};
-
-/**
- * Get ALL moves for a Pokémon across every game.
- * Used on the detail page when the Gen 1 Only toggle is off.
- * Deduplicates by move name since a move can appear in many versions.
- */
-export const getAllMoves = (
-  pokemon: Pokemon
-): Array<{name: string; url: string; learnMethod: string; level: number}> => {
-  const seen = new Set<string>();
-  const allMoves: Array<{name: string; url: string; learnMethod: string; level: number}> = [];
-
-  for (const moveEntry of pokemon.moves) {
-    if (seen.has(moveEntry.move.name)) continue;
-    seen.add(moveEntry.move.name);
-
-    // Use the first version group detail we find for learn method + level
-    const detail = moveEntry.version_group_details[0];
-    if (!detail) continue;
-
-    allMoves.push({
-      name: moveEntry.move.name,
-      url: moveEntry.move.url,
-      learnMethod: detail.move_learn_method.name,
-      level: detail.level_learned_at,
-    });
-  }
-
-  return allMoves.sort((a, b) => {
-    if (a.learnMethod === 'level-up' && b.learnMethod !== 'level-up') return -1;
-    if (a.learnMethod !== 'level-up' && b.learnMethod === 'level-up') return 1;
-    if (a.learnMethod === 'level-up' && b.learnMethod === 'level-up') {
-      return a.level - b.level;
-    }
-    return a.name.localeCompare(b.name);
-  });
-};
-
 /* ============================================================
    SEARCH FUNCTION
    ============================================================ */
@@ -716,4 +634,95 @@ export const getStatPercentile = (statName: string, value: number): number => {
   }
 
   return 100; // above p100 threshold
+};
+
+/* ============================================================
+   GENERATION + VERSION GROUP
+   Used by GameSelector to populate the generation and game pickers.
+   ============================================================ */
+
+const formatVersionGroupName = (name: string): string =>
+  name
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+export const getGenerations = async (): Promise<{id: number; name: string}[]> => {
+  const res = await fetch('https://pokeapi.co/api/v2/generation?limit=20');
+  const data = (await res.json()) as {results: Array<{name: string; url: string}>};
+  return data.results.map((g, i) => ({id: i + 1, name: g.name}));
+};
+
+export const getVersionGroupsForGeneration = async (genId: number): Promise<{name: string; displayName: string}[]> => {
+  const res = await fetch(`https://pokeapi.co/api/v2/generation/${genId}`);
+  const data = (await res.json()) as {version_groups: Array<{name: string; url: string}>};
+  return data.version_groups.map((vg) => ({
+    name: vg.name,
+    displayName: formatVersionGroupName(vg.name),
+  }));
+};
+
+export const getMovesForVersionGroup = async (
+  rawMoves: PokemonMove[],
+  versionGroup: string
+): Promise<{levelUpMoves: MoveEntry[]; machineMoves: MoveEntry[]}> => {
+  // Filter the full moves array down to just this version group
+  const filtered = rawMoves.flatMap((pm) => {
+    const detail = pm.version_group_details.find((d) => d.version_group.name === versionGroup);
+    if (!detail) return [];
+    return [
+      {
+        name: pm.move.name,
+        url: pm.move.url,
+        learnMethod: detail.move_learn_method.name,
+        level: detail.level_learned_at,
+      },
+    ];
+  });
+
+  // Fetch move details (type, power, accuracy) for all unique moves in parallel
+  const uniqueNames = [...new Set(filtered.map((m) => m.name))];
+  const details = await Promise.all(
+    uniqueNames.map((name) =>
+      fetch(`https://pokeapi.co/api/v2/move/${name}`)
+        .then((r) => r.json())
+        .catch(() => null)
+    )
+  );
+  const moveMap = new Map(uniqueNames.map((name, i) => [name, details[i]]));
+
+  // For machine moves, fetch the machine entry to get the TM number
+  const machineRaw = filtered.filter((m) => m.learnMethod === 'machine');
+  const machineData = await Promise.all(
+    machineRaw.map(async (m) => {
+      const detail = moveMap.get(m.name);
+      const machineRef = detail?.machines?.find(
+        (mc: {version_group: {name: string}; machine: {url: string}}) => mc.version_group.name === versionGroup
+      );
+      if (!machineRef) return null;
+      return fetch(machineRef.machine.url)
+        .then((r) => r.json())
+        .catch(() => null);
+    })
+  );
+
+  const enrich = (raw: typeof filtered, tmData?: typeof machineData): MoveEntry[] =>
+    raw.map((m, i) => {
+      const d = moveMap.get(m.name);
+      const tm = tmData?.[i];
+      const tmNumber = tm?.item?.name?.match(/\d+/)?.[0] ? parseInt(tm.item.name.match(/\d+/)![0], 10) : undefined;
+      return {
+        ...m,
+        type: d?.type?.name ?? 'normal',
+        damageClass: d?.damage_class?.name ?? 'status',
+        power: d?.power ?? null,
+        accuracy: d?.accuracy ?? null,
+        ...(tmNumber !== undefined && {tmNumber}),
+      };
+    });
+
+  const levelUpMoves = enrich(filtered.filter((m) => m.learnMethod === 'level-up')).sort((a, b) => a.level - b.level);
+  const machineMoves = enrich(machineRaw, machineData).sort((a, b) => (a.tmNumber ?? 999) - (b.tmNumber ?? 999));
+
+  return {levelUpMoves, machineMoves};
 };
