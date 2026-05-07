@@ -3,22 +3,24 @@
 /*
   components/PokemonDetailClient.tsx
 
-  Client Component that renders the Evolution Chain and Moves sections
-  with a shared Gen 1 Only toggle controlling both.
+  Client Component that renders the Evolution Chain and Moves sections.
 
   WHY THIS IS A CLIENT COMPONENT:
-  The Gen 1 toggle reads from and writes to localStorage, which only
-  exists in the browser. The toggle state also needs to trigger
-  re-renders when changed. Both of these require "use client".
+  The game/generation selector is interactive state — when the user picks
+  a different game, we need to re-fetch and re-render the moves list.
+  useState and useEffect only run in the browser, so this must be a
+  Client Component.
 
-  The parent page (Server Component) fetches ALL the data and passes
-  it down as props — both the Gen 1 filtered sets and the full sets.
-  This component just picks which to display based on toggle state.
-  No additional fetching happens here.
+  DATA FLOW:
+  The parent page (Server Component) fetches the Pokémon's full moves
+  array from PokéAPI and passes it down as `rawMoves`. This component
+  holds the selected version group in state, and whenever it changes,
+  calls `getMovesForVersionGroup` (lib/api.ts) to filter and enrich
+  the move data client-side — no page navigation required.
 
   This is the recommended Next.js pattern:
-    Server Component: fetch everything, pass as props
-    Client Component: receive data, handle interactivity
+    Server Component: fetch the raw data, pass as props
+    Client Component: hold interactive state, call api helpers on change
 */
 
 import {useState, useEffect} from 'react';

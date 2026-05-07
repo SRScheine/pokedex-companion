@@ -15,6 +15,7 @@ A full-featured Pokémon reference app built with Next.js App Router, TypeScript
 - Percentile-based stat radar chart
 - Stat table with tier-colored percentile ranks
 - Type defense chart showing combined effectiveness for single and dual-type Pokémon, including 4× and ¼× stacked interactions
+- Move browser with generation and game selector — level-up and TM moves for any of the 9 generations, with sortable columns for level/TM number, type, category, power, and accuracy
 
 **Type Chart**
 
@@ -45,14 +46,14 @@ A full-featured Pokémon reference app built with Next.js App Router, TypeScript
 
 ## Tech Stack
 
-|            |                                                                       |
-| ---------- | --------------------------------------------------------------------- |
-| Framework  | [Next.js 15](https://nextjs.org) — App Router, Server Components, SSG |
-| Language   | TypeScript                                                            |
-| Styling    | Tailwind CSS v4                                                       |
+|            |                                                                                         |
+| ---------- | --------------------------------------------------------------------------------------- |
+| Framework  | [Next.js 15](https://nextjs.org) — App Router, Server Components, SSG                   |
+| Language   | TypeScript                                                                              |
+| Styling    | Tailwind CSS v4                                                                         |
 | State      | [Redux Toolkit](https://redux-toolkit.js.org) — favorites with localStorage persistence |
-| Data       | [PokéAPI](https://pokeapi.co)                                         |
-| Deployment | [Vercel](https://vercel.com)                                          |
+| Data       | [PokéAPI](https://pokeapi.co)                                                           |
+| Deployment | [Vercel](https://vercel.com)                                                            |
 
 ---
 
@@ -60,7 +61,7 @@ A full-featured Pokémon reference app built with Next.js App Router, TypeScript
 
 **Static Site Generation at scale** — `generateStaticParams` pre-renders all 1,025 Pokémon detail pages at build time. Every detail page is served as static HTML with zero server processing at request time.
 
-**Server Components by default** — data fetching happens on the server wherever possible. Client Components are used only where interactivity is required (Gen 1 toggle, search input, team builder). This keeps JavaScript bundle sizes small.
+**Server Components by default** — data fetching happens on the server wherever possible. Client Components are used only where interactivity is required (game selector, search input, team builder). This keeps JavaScript bundle sizes small.
 
 **Percentile stat engine** — a build-time script (`scripts/generate-pokemon-stats.ts`) fetches all base-form Pokémon, computes p10–p100 breakpoints per stat, and writes them to a static JSON file committed to the repo. The radar chart and stat table read from this file at render time with no runtime API cost.
 

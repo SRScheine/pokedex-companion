@@ -362,20 +362,10 @@ const PokemonDetailPage = async ({params}: {params: Promise<{id: string}>}) => {
       {/* ── EVOLUTION CHAIN + MOVES ── */}
       {/*
           PokemonDetailClient handles both sections.
-          It's a Client Component so it can read localStorage for the
-          Gen 1 toggle state and re-render when the user toggles it.
-
-          We pass both move sets (Gen 1 filtered + all) so the client
-          can switch between them without fetching again.
-
-          The server has already done all the data fetching — the client
-          just decides which subset to display.
+          It's a Client Component so it can get the necessary move information from the PokéAPI
+          (which requires client-side fetching).
       */}
-      <PokemonDetailClient
-        pokemonId={pokemon.id}
-        evolutions={evolutions}
-        rawMoves={pokemon.moves}
-      />
+      <PokemonDetailClient pokemonId={pokemon.id} evolutions={evolutions} rawMoves={pokemon.moves} />
     </div>
   );
 };
