@@ -52,58 +52,77 @@ const PokemonCard = ({pokemon}: PokemonCardProps) => {
 
   return (
     /*
-      <Link> wrapping the entire card makes the whole card clickable.
-      In RN: <Pressable onPress={() => navigation.navigate('Detail', { id })}>
-      On web: <Link href={path}> — renders as <a>, whole area is tappable.
+      STRETCHED LINK PATTERN — fixes the nested interactive element problem.
+
+      HTML does not allow a <button> inside an <a>. When we had FavoriteButton
+      inside the <Link>, browsers silently moved the button outside the anchor
+      in their internal representation, making it invisible to VoiceOver and
+      unreachable by Tab.
+
+      The fix: the card is now a plain <div>. Inside it we have TWO siblings:
+        1. <Link>  — stretched to cover the entire card with absolute inset-0
+        2. <FavoriteButton> — positioned above the link with a higher z-index
+
+      Both are valid, independent interactive elements. Tab and VoiceOver can
+      reach each one separately.
+
+      The <div> takes over the card's visual styles (shadow, rounded corners,
+      hover effects). The group class on the div still enables group-hover:
+      on child elements like the sprite image.
+
+      In RN: this issue doesn't exist because TouchableOpacity/Pressable are
+      not anchor tags — you can freely nest them. On web, the <a> tag has
+      strict content rules.
 
       group: enables group-hover: child styles (hover effects on children
       when the parent is hovered). Web-only CSS feature.
     */
-    <Link
-      href={`/pokedex/${pokemon.id}`}
-      className="group card hover:shadow-card-hover relative flex flex-col items-center overflow-hidden text-center transition-all duration-200 hover:-translate-y-1"
-    >
-      {/*
-        Decorative type-colored circle behind the sprite.
-        absolute inset-0: fills the card entirely.
-        opacity-10: very faint — just a subtle tint.
-        rounded-full + scale-75: large circle centered in the card.
-        pointer-events-none: doesn't interfere with clicks.
-
-        This is a pure CSS decorative element — no RN equivalent needed,
-        just a fun web styling trick.
-      */}
+    <div className="group card hover:shadow-card-hover relative flex flex-col items-center overflow-hidden text-center transition-all duration-200 hover:-translate-y-1">
+      {/* Decorative type-colored circle behind the sprite */}
       <div
         className={`absolute inset-0 bg-type-${primaryType} translate-y-4 scale-75 rounded-full opacity-10`}
         aria-hidden="true"
       />
 
       {/*
-        FavoriteButton: a Client Component rendered inside a Server Component.
-        Next.js handles the boundary automatically — the button hydrates on the
-        client and connects to Redux, while the card shell stays server-rendered.
+        The link is stretched to fill the entire card via absolute inset-0.
+        z-10 sits it above the decorative circle but below the FavoriteButton.
+        Keyboard users Tab to this link; mouse users click anywhere on the card.
 
-        absolute top-2 right-2 z-20: pins the button to the top-right corner of
-        the card. The card's <Link> already has `relative` so this positions
-        against the card boundary, not the page.
-        z-20: sits above the decorative circle (z-10) and image (z-10).
+        aria-label gives VoiceOver a clean name ("View Bulbasaur") instead of
+        computing it from all the nested text inside the card.
+        WCAG 2.4.6 (Headings and Labels) — Level AA
+
+              <Link> wrapping the entire card makes the whole card clickable.
+      In RN: <Pressable onPress={() => navigation.navigate('Detail', { id })}>
+      On web: <Link href={path}> — renders as <a>, whole area is tappable.
+
+      WCAG 2.4.7 (Focus Visible) — Level AA
+      The global :focus-visible rule in globals.css would give this a 4px
+      border-radius outline, but the card is rounded-2xl (16px). We use
+      focus-visible:ring-* instead — ring uses box-shadow which automatically
+      follows the element's border-radius, so the ring hugs the card shape.
+      focus-visible:outline-none suppresses the global outline so we don't
+      get both a ring AND an outline at the same time.
+      */}
+      <Link
+        href={`/pokedex/${pokemon.id}`}
+        aria-label={`View ${capitalize(pokemon.name)}`}
+        className="focus-visible:ring-pokemon-red absolute inset-0 z-10 rounded-2xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+      />
+
+      {/*
+        FavoriteButton is now a SIBLING of the Link, not a child.
+        z-20 places it above the stretched link so it receives clicks/taps.
+        e.stopPropagation() inside FavoriteButton is no longer needed for
+        preventing link navigation (they're siblings now), but it's harmless.
       */}
       <FavoriteButton pokemon={favData} className="absolute top-2 right-2 z-20" />
 
       {/* Pokédex number */}
       <p className="text-pokemon-gray z-10 mb-1 self-start text-xs font-medium">{formatPokemonId(pokemon.id)}</p>
 
-      {/*
-        Pokémon sprite image.
-
-        group-hover:scale-110: grows the sprite when the card is hovered.
-        transition-transform duration-300: smooth 300ms scale animation.
-        Pure CSS — no Animated.timing(), no reanimated.
-
-        z-10: stacks above the decorative circle (which has no z-index = z-0).
-        CSS stacking context: higher z-index = in front.
-        Same concept as RN's zIndex, same prop name in Tailwind.
-      */}
+      {/* Sprite — group-hover:scale-110 still works because group is on the parent div */}
       <Image
         src={getSpriteUrl(pokemon.id, 'artwork')}
         width={96}
@@ -122,7 +141,7 @@ const PokemonCard = ({pokemon}: PokemonCardProps) => {
           <TypeBadge key={type.name} typeName={type.name} size="sm" />
         ))}
       </div>
-    </Link>
+    </div>
   );
 };
 

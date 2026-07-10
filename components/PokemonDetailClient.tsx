@@ -86,8 +86,43 @@ const SortHeader = ({column, label, sortColumn, sortDirection, onSort}: SortHead
     column === 'type' ? 'px-2' : column === 'power' ? 'px-1 md:px-6' : column === 'accuracy' ? 'px-1 md:px-5' : 'px-1';
 
   return (
+    /*
+      WCAG 1.3.1 (Info and Relationships) — Level A
+
+      scope="col": declares this <th> as a column header. Screen readers use
+      this to associate data cells with their headers when reading the table.
+      Without it, a screen reader might not know which column a cell belongs to.
+
+      aria-sort: communicates the current sort state to screen readers.
+      Values: "ascending" | "descending" | "none" (sortable but not active).
+      Without this, a blind user sees the emoji arrows (▲▼) read as "up
+      triangle" and "down triangle" — meaningless without visual context.
+      With aria-sort, they hear "Name, column header, ascending" instead.
+
+      In RN: table sorting doesn't exist natively, but the pattern translates
+      to any list with sortable headers — same ARIA concept would apply in
+      a web view or with custom accessibilityHint text.
+    */
     <th
+      scope="col"
+      aria-sort={isActive ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
       onClick={() => onSort(column)}
+      /*
+        tabIndex={0}: adds this <th> to the normal tab order.
+        <th> elements are not focusable by default — only form controls
+        and links are. tabIndex=0 opts it in at its natural DOM position.
+
+        onKeyDown: <th> doesn't activate on Enter/Space like a <button>
+        does, so we wire it up manually. This is the keyboard equivalent
+        of the onClick above.
+      */
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSort(column);
+        }
+      }}
       className={`text-pokemon-gray hover:text-pokemon-black cursor-pointer ${labelPadding} py-1 text-left text-xs font-medium select-none ${
         isActive ? 'text-pokemon-black' : ''
       }`}
@@ -328,6 +363,15 @@ const PokemonDetailClient = ({pokemonId, evolutions, rawMoves}: Props) => {
             {activeMoveTab === 'level-up' && levelUpMoves.length > 0 && (
               <div className="scrollbar-hide overflow-x-auto">
                 <table className="w-full text-sm md:table-fixed">
+                  {/*
+                    <caption>: WCAG 1.3.1 (Info and Relationships) — Level A
+                    Provides a visible (and screen-reader-readable) title for
+                    the table. Screen readers announce the caption when entering
+                    the table: "Moves learned by level up, table, 6 columns".
+                    sr-only hides it visually since the tab button already
+                    acts as a label, but it remains available to assistive tech.
+                  */}
+                  <caption className="sr-only">Moves learned by level up</caption>
                   <colgroup>
                     <col className="w-10" />
                     <col className="w-30" />
@@ -359,7 +403,9 @@ const PokemonDetailClient = ({pokemonId, evolutions, rawMoves}: Props) => {
                         sortDirection={sortDirection}
                         onSort={handleSort}
                       />
-                      <th className="text-pokemon-gray px-1 py-1 text-center text-xs font-medium">Cat.</th>
+                      <th scope="col" className="text-pokemon-gray px-1 py-1 text-center text-xs font-medium">
+                        Cat.
+                      </th>
                       <SortHeader
                         column="power"
                         label="Pwr."
@@ -411,6 +457,7 @@ const PokemonDetailClient = ({pokemonId, evolutions, rawMoves}: Props) => {
             {activeMoveTab === 'tm' && machineMoves.length > 0 && (
               <div className="scrollbar-hide overflow-x-auto">
                 <table className="w-full text-sm md:table-fixed">
+                  <caption className="sr-only">Moves learned by TM</caption>
                   <colgroup>
                     <col className="w-10" />
                     <col className="w-30" />
@@ -442,7 +489,9 @@ const PokemonDetailClient = ({pokemonId, evolutions, rawMoves}: Props) => {
                         sortDirection={sortDirection}
                         onSort={handleSort}
                       />
-                      <th className="text-pokemon-gray px-1 py-1 text-center text-xs font-medium">Cat.</th>
+                      <th scope="col" className="text-pokemon-gray px-1 py-1 text-center text-xs font-medium">
+                        Cat.
+                      </th>
                       <SortHeader
                         column="power"
                         label="Pwr."

@@ -240,7 +240,13 @@ const Navbar = () => {
           
           items-center gap-1: flex row with small gaps between links
         */}
-        <nav className="hidden items-center gap-1 md:flex">
+        {/*
+          aria-label="Primary navigation": distinguishes this <nav> from
+          any other <nav> on the page (e.g. pagination on the Pokédex page).
+          Screen readers announce "Primary navigation" when entering this region.
+          WCAG 4.1.2 (Name, Role, Value) — Level A
+        */}
+        <nav aria-label="Primary navigation" className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
             /*
               Active link detection:
@@ -321,6 +327,16 @@ const Navbar = () => {
           className="flex flex-col gap-1.5 p-2 text-white md:hidden"
           aria-label="Toggle mobile menu"
           aria-expanded={isMobileMenuOpen}
+          /*
+            aria-controls: tells screen readers which element THIS button
+            controls. The value must match the `id` on the mobile nav below.
+            When a screen reader announces this button, it will also announce
+            "controls mobile-menu" — giving context about what will happen.
+            WCAG 4.1.2 (Name, Role, Value) — Level A
+
+            In React Native: accessibilityHint provides similar context.
+          */
+          aria-controls="mobile-menu"
         >
           {/*
             Animated hamburger icon — three lines that visually
@@ -380,10 +396,16 @@ const Navbar = () => {
         bg-pokemon-darkred: slightly darker red to distinguish
         the dropdown from the main bar.
       */}
+      {/*
+        id="mobile-menu": the anchor for aria-controls on the hamburger button above.
+        The button's aria-controls="mobile-menu" points here, creating a programmatic
+        relationship that screen readers can follow and announce.
+      */}
       <div
+        id="mobile-menu"
         className={`bg-pokemon-darkred overflow-y-auto transition-all duration-300 md:hidden ${isMobileMenuOpen ? 'max-h-80' : 'max-h-0'} `}
       >
-        <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-2">
+        <nav aria-label="Mobile navigation" className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-2">
           {NAV_LINKS.map((link) => {
             const isActive = pathname.startsWith(link.href);
             return (

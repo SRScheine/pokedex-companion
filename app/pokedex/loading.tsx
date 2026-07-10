@@ -75,7 +75,30 @@ const CardSkeleton = () => {
 
 const PokedexLoading = () => {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    /*
+      WCAG 4.1.3 (Status Messages) — Level AA
+
+      role="status": identifies this as a status region. Screen readers
+      will announce its content without requiring the user to navigate to
+      it — the same concept as aria-live="polite" but with the built-in
+      semantic meaning of "this is a status update."
+
+      aria-busy="true": explicitly tells assistive tech that this region
+      is still loading. Screen readers may announce "busy" or wait before
+      reading the content.
+
+      aria-label: gives the status region an accessible name so screen
+      readers say "Loading Pokédex, status" instead of just "status."
+
+      In RN: ActivityIndicator with accessibilityLabel covers this.
+      On web: role + aria-busy + aria-label together convey the same info.
+    */
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading Pokédex"
+      className="mx-auto max-w-6xl px-4 py-8"
+    >
       {/* Header skeleton */}
       <div className="mb-8 flex animate-pulse flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>

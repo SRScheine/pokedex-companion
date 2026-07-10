@@ -13,7 +13,7 @@
   All of these require "use client".
 */
 
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type {PokemonType} from '@/types/pokemon';
@@ -128,6 +128,87 @@ const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
   const artworkUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${winner.id}.png`;
 
   /*
+    FOCUS MANAGEMENT
+
+    WCAG 2.4.3 (Focus Order) — Level A
+    WCAG 4.1.2 (Name, Role, Value) — Level A
+
+    When a modal opens, the keyboard focus must MOVE INTO it. Without this,
+    a keyboard user's focus stays wherever it was (e.g. the Spin button)
+    and their next Tab press takes them to the NEXT element on the page
+    BEHIND the modal — completely bypassing the modal content.
+
+    modalRef: a ref attached to the modal container <div>.
+    useRef gives us direct DOM access without causing re-renders —
+    the same concept as React Native's `ref` on a View.
+
+    On mount:
+    1. Save which element was focused BEFORE the modal opened
+    2. Move focus INTO the modal (the container itself, via tabIndex=-1)
+
+    On unmount (modal closes):
+    3. Return focus to the element that was focused before the modal —
+       so the keyboard user ends up right back where they were.
+       In RN: the OS handles this for Modal components automatically.
+       On web: you do it manually.
+  */
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement;
+    modalRef.current?.focus();
+    return () => {
+      previouslyFocused?.focus();
+    };
+  }, []);
+
+  /*
+    FOCUS TRAP
+
+    WCAG 2.1.2 (No Keyboard Trap) — Level A (note: this criterion says
+    you must be ABLE to leave a component — but for modals the intent is
+    that focus STAYS inside until the user explicitly dismisses it).
+
+    When a modal is open, Tab should cycle through elements INSIDE it,
+    not escape to the page behind. Without this, Tab would reach the last
+    focusable element inside and then jump to the address bar or the first
+    page element — breaking the modal interaction entirely.
+
+    How the trap works:
+    - Find all focusable elements inside the modal
+    - If Tab is pressed on the LAST one, wrap around to the first
+    - If Shift+Tab is pressed on the FIRST one, wrap around to the last
+    - Any other key: let it pass through normally (including Escape,
+      which is handled by the existing keydown listener above)
+  */
+  const handleFocusTrap = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab') return;
+
+    const focusable = Array.from(
+      modalRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+      ) ?? []
+    ) as HTMLElement[];
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey) {
+      // Shift+Tab on the first element → wrap to last
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      }
+    } else {
+      // Tab on the last element → wrap to first
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    }
+  };
+
+  /*
     LOCK BODY SCROLL WHILE MODAL IS OPEN
 
     In React Native, modals automatically prevent scrolling
@@ -192,8 +273,26 @@ const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
         Same flexbox properties, same values — just Tailwind syntax.
 
       p-4: 16px padding so the modal doesn't touch screen edges on mobile.
+
+      WCAG 4.1.2 (Name, Role, Value) — Level A
+      role="dialog"     — identifies this as a dialog to screen readers.
+      aria-modal="true" — tells screen readers to ignore page content behind it.
+      aria-labelledby   — points to the <h2> inside by id so screen readers
+                          announce the Pokémon name as the dialog's title.
+      tabIndex={-1}     — makes the div programmatically focusable so our
+                          useEffect can call .focus() on it. -1 means it
+                          won't appear in the normal Tab order.
+      ref + onKeyDown   — wired to our focus management and focus trap.
     */
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="winner-modal-title"
+      tabIndex={-1}
+      ref={modalRef}
+      onKeyDown={handleFocusTrap}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 focus:outline-none"
+    >
       {/* Confetti layer */}
       {/*
         absolute inset-0: fills the entire fixed overlay.
@@ -351,7 +450,8 @@ const WinnerModal = ({winner, onClose, onSpinAgain}: WinnerModalProps) => {
                 */}
                 THE WHEEL CHOSE...
               </p>
-              <h2 className="font-[family-name:var(--font-pixel)] text-2xl text-white drop-shadow-lg">
+              {/* id matches aria-labelledby on the outer dialog div */}
+              <h2 id="winner-modal-title" className="font-[family-name:var(--font-pixel)] text-2xl text-white drop-shadow-lg">
                 {/*
                   drop-shadow-lg: a CSS filter drop-shadow.
                   Different from box-shadow (shadow-lg):

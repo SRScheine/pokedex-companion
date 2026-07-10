@@ -168,6 +168,72 @@ img {
 }
 
 /* ============================================================
+   FOCUS-VISIBLE — Global keyboard focus indicator
+
+   WCAG 2.4.7 (Focus Visible) — Level AA
+
+   :focus fires whenever an element receives focus — including
+   when you CLICK with a mouse. That produces ugly rings on
+   buttons that mouse users never need to see.
+
+   :focus-visible fires only when the browser determines the
+   user is navigating by KEYBOARD. Mouse clicks don't trigger it.
+   This means: keyboard users always see a ring, mouse users never do.
+
+   In React Native: the OS handles focus indicators for you.
+   On web: you manage them in CSS.
+
+   A global rule here catches everything automatically — including
+   any element you forgot to style. Elements with their OWN focus
+   styles (like our search inputs that use `focus:ring-2
+   focus:outline-none`) are unaffected because Tailwind utility
+   classes have higher CSS specificity than this bare pseudo-class.
+   ============================================================ */
+/* Step 1: Remove the browser's default ring on all focus events.
+   Without this, Chrome briefly flashes its built-in blue/black ring
+   before our :focus-visible rule paints — causing the flash you saw. */
+:focus {
+  outline: none;
+}
+
+/* Step 2: Restore a ring, but ONLY for keyboard navigation.
+   :focus-visible does NOT fire on mouse clicks, so mouse users see
+   nothing; keyboard users see the ring below.
+   Color is pokemon-black (#212121): 16:1 contrast on white backgrounds,
+   ~3.7:1 on the red navbar — both above WCAG's 3:1 minimum. */
+:focus-visible {
+  outline: 2px solid var(--color-pokemon-black);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   PREFERS-REDUCED-MOTION
+
+   WCAG 2.3.3 (Animation from Interactions) — Level AAA
+
+   Some users have vestibular disorders (inner ear conditions
+   that cause dizziness from on-screen motion) or epilepsy.
+   Their OS has a "Reduce Motion" accessibility setting.
+
+   @media (prefers-reduced-motion: reduce) fires when that setting
+   is on. We cut all animation durations to nearly zero — the app
+   still works, it just skips the motion.
+
+   This is the web equivalent of UIAccessibility.isReduceMotionEnabled
+   in iOS / AccessibilityInfo.isReduceMotionEnabled in React Native.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
    @utility — Custom utility classes (Tailwind v4 syntax)
    In v3 this was: @layer utilities { .my-class { ... } }
    ============================================================ */

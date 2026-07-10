@@ -218,11 +218,26 @@ const PokedexPage = async ({searchParams}: PokedexPageProps) => {
         URL-based pagination is a web-specific pattern.
       */}
       {!isSearching && totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-2">
+        /*
+          WCAG 2.4.6 (Headings and Labels) — Level AA
+
+          <nav aria-label="Pagination">: wraps the pagination in a named
+          landmark so screen reader users can jump to it directly via their
+          landmark navigation shortcut (e.g. VoiceOver: VO + U, then filter
+          by "Navigation"). The label distinguishes it from the primary
+          navbar — screen readers would otherwise announce two unlabeled
+          "navigation" landmarks, which is confusing.
+
+          In RN: there's no landmark concept; on web, named <nav> elements
+          are the equivalent of named "navigation regions" that power users
+          use to quickly orient themselves on a page.
+        */
+        <nav aria-label="Pagination" className="mt-4 flex items-center justify-center gap-2">
           {/* Previous button */}
           {currentPage > 1 ? (
             <Link
               href={`/pokedex?page=${currentPage - 1}`}
+              aria-label="Go to previous page"
               className="border-pokemon-lightgray text-pokemon-black hover:bg-pokemon-lightgray flex items-center gap-1 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-colors"
             >
               ← Prev
@@ -234,10 +249,13 @@ const PokedexPage = async ({searchParams}: PokedexPageProps) => {
               in all cases — for links, simply not rendering the link
               is cleaner than a disabled anchor tag.
               aria-disabled for accessibility.
+              aria-hidden removes it from the tab order entirely since
+              it has no interactive function when disabled.
             */
             <div
               className="bg-pokemon-lightgray text-pokemon-gray flex cursor-not-allowed items-center gap-1 rounded-full px-4 py-2 text-sm font-medium"
               aria-disabled="true"
+              aria-hidden="true"
             >
               ← Prev
             </div>
@@ -268,7 +286,7 @@ const PokedexPage = async ({searchParams}: PokedexPageProps) => {
               }, [])
               .map((item, idx) =>
                 item === '...' ? (
-                  <span key={`ellipsis-${idx}`} className="text-pokemon-gray px-2 text-sm">
+                  <span key={`ellipsis-${idx}`} className="text-pokemon-gray px-2 text-sm" aria-hidden="true">
                     ...
                   </span>
                 ) : (
@@ -277,10 +295,19 @@ const PokedexPage = async ({searchParams}: PokedexPageProps) => {
                     href={`/pokedex?page=${item}`}
                     className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                       item === currentPage
-                        ? 'bg-pokemon-red text-white' // Active page
+                        ? 'bg-pokemon-red text-white'
                         : 'border-pokemon-lightgray text-pokemon-black hover:bg-pokemon-lightgray border bg-white'
                     }`}
                     aria-current={item === currentPage ? 'page' : undefined}
+                    /*
+                      aria-label with page context:
+                      Without this, a screen reader announces "3, link".
+                      With this, it announces "Page 3 of 52, link" — giving
+                      the user the total count so they know where they are.
+                      aria-current="page" on the active link additionally
+                      announces "current page" for the selected one.
+                    */
+                    aria-label={`Page ${item} of ${totalPages}`}
                   >
                     {item}
                   </Link>
@@ -292,6 +319,7 @@ const PokedexPage = async ({searchParams}: PokedexPageProps) => {
           {currentPage < totalPages ? (
             <Link
               href={`/pokedex?page=${currentPage + 1}`}
+              aria-label="Go to next page"
               className="border-pokemon-lightgray text-pokemon-black hover:bg-pokemon-lightgray flex items-center gap-1 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-colors"
             >
               Next →
@@ -300,11 +328,12 @@ const PokedexPage = async ({searchParams}: PokedexPageProps) => {
             <div
               className="bg-pokemon-lightgray text-pokemon-gray flex cursor-not-allowed items-center gap-1 rounded-full px-4 py-2 text-sm font-medium"
               aria-disabled="true"
+              aria-hidden="true"
             >
               Next →
             </div>
           )}
-        </div>
+        </nav>
       )}
 
       {/* Page count info */}

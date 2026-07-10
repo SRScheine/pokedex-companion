@@ -213,6 +213,43 @@ const RootLayout = ({children}: {children: React.ReactNode}) => {
         */}
         <StoreProvider>
           <ScrollToTop />
+
+          {/*
+            ── SKIP-TO-MAIN LINK ──────────────────────────────────────────
+
+            WCAG 2.4.1 (Bypass Blocks) — Level A
+
+            Keyboard users navigate with Tab. Without a skip link, they
+            must Tab through EVERY nav link on EVERY page before reaching
+            the main content. Our navbar has 6 links, so that's 6 extra
+            Tab presses on every page visit — frustrating for anyone
+            using a keyboard or screen reader.
+
+            This link is VISUALLY HIDDEN by default (sr-only) so mouse
+            users never see it. When a keyboard user presses Tab as their
+            FIRST action, this link receives focus and APPEARS on screen.
+            Pressing Enter jumps focus directly to the <main> content.
+
+            In React Native: modals and navigators handle focus automatically.
+            On the web: you manage it explicitly. This link is the standard
+            solution — every accessible website has one.
+
+            CLASS BREAKDOWN:
+            sr-only         → visually hidden (clip + 1px size trick)
+            focus:not-sr-only → reverses sr-only when focused (makes it visible)
+            focus:absolute   → pulls it out of flow so it floats above the navbar
+            focus:top-4      → 16px from the top of the viewport
+            focus:left-4     → 16px from the left
+            focus:z-100    → above the navbar (z-50) so it's never blocked
+            The rest are cosmetic — red background, white text, rounded, shadow
+          */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:rounded-lg focus:bg-pokemon-red focus:px-4 focus:py-2 focus:text-sm focus:text-white focus:shadow-lg focus:outline-none"
+          >
+            Skip to main content
+          </a>
+
           <Navbar />
 
           {/*
@@ -243,8 +280,19 @@ const RootLayout = ({children}: {children: React.ReactNode}) => {
 
             flex-1: makes this area grow to fill remaining vertical space.
             Same as flex:1 in React Native StyleSheet!
+
+            id="main-content": the ANCHOR TARGET for the skip link above.
+            The href="#main-content" in the skip link jumps focus here.
           */}
-          <main className="flex-1 pt-[var(--nav-height)]">{children}</main>
+          {/*
+            tabIndex={-1}: makes <main> programmatically focusable so the
+            skip link's href="#main-content" actually LANDS focus here.
+            Without it, pressing Enter on the skip link scrolls to <main>
+            but focus stays on the skip link — the user still has to Tab
+            through every nav link. tabIndex=-1 means "focusable by script
+            or anchor link, but NOT part of the normal Tab sequence."
+          */}
+          <main id="main-content" tabIndex={-1} className="flex-1 pt-[var(--nav-height)] focus:outline-none">{children}</main>
 
           {/*
             FOOTER — simple for now

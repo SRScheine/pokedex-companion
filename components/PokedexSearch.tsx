@@ -187,8 +187,19 @@ const PokedexSearch = () => {
 
       In RN: you'd manually handle the TextInput's onSubmitEditing.
       On web: wrapping inputs in <form> gives you Enter-to-submit for free.
+
+      onKeyDown: events from ALL children bubble up to the form, so this
+      single handler catches Escape from both the input and any suggestion
+      button. WCAG 1.4.13 (Content on Hover or Focus) — Level AA requires
+      that content appearing on focus is dismissible without moving focus.
     */
-    <form onSubmit={handleSearch} className="relative w-full max-w-md">
+    <form
+      onSubmit={handleSearch}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') setSuggestions([]);
+      }}
+      className="relative w-full max-w-md"
+    >
       <div className="relative">
         {/* Search icon — decorative, positioned absolutely inside the input */}
         <span
@@ -221,6 +232,25 @@ const PokedexSearch = () => {
             styled ring (ring-2). This is important for accessibility
             — never remove focus styles without replacing them.
             In RN: focus styles are handled by the native OS.
+
+          WCAG 4.1.2 (Name, Role, Value) — Level A
+          The combobox ARIA pattern describes an input that has a
+          popup list of options. Three attributes work together:
+
+          role="combobox"        — identifies this as a combobox widget
+                                   so screen readers know it has a list
+          aria-expanded          — announces whether the suggestion list
+                                   is open (true) or closed (false).
+                                   Screen readers say "expanded" or "collapsed"
+          aria-haspopup="listbox"— tells screen readers what KIND of popup
+                                   to expect (a listbox, not a menu or dialog)
+          aria-controls          — points to the listbox by id so screen
+                                   readers can jump to it directly
+          aria-autocomplete="list"— tells screen readers that completion
+                                   suggestions will appear in a list
+
+          In RN: accessibilityRole="combobox" and accessibilityState
+          cover some of this, but native components handle much of it.
         */}
         <input
           type="text"
@@ -231,13 +261,12 @@ const PokedexSearch = () => {
           }}
           placeholder="Search Pokémon..."
           className="border-pokemon-lightgray focus:ring-pokemon-red text-pokemon-black placeholder:text-pokemon-gray w-full rounded-full border bg-white py-2.5 pr-10 pl-10 text-sm focus:ring-2 focus:outline-none"
-          /*
-            aria-label: screen reader label for the input.
-            In RN: accessibilityLabel
-            On web: aria-label
-            Same concept, different prop name.
-          */
           aria-label="Search Pokémon by name"
+          role="combobox"
+          aria-expanded={suggestions.length > 0}
+          aria-haspopup="listbox"
+          aria-controls="search-suggestions"
+          aria-autocomplete="list"
         />
 
         {/* Clear button — only shown when there's a query */}
@@ -252,6 +281,35 @@ const PokedexSearch = () => {
           </button>
         )}
       </div>
+
+      {/*
+        LIVE REGION — announces suggestion count to screen readers
+
+        WCAG 4.1.3 (Status Messages) — Level AA
+
+        When suggestions appear, a sighted user can SEE the dropdown.
+        A screen reader user has no idea the list appeared unless something
+        announces it. aria-live="polite" makes the browser read out any
+        text change inside this element as soon as the user finishes their
+        current action — without interrupting what they were hearing.
+
+        "polite" = wait for silence before announcing (vs "assertive" which
+        interrupts immediately — reserved for errors or urgent alerts).
+
+        sr-only: visually hidden, but readable by screen readers.
+        This element has no visual purpose — it exists purely for announcements.
+
+        In RN: AccessibilityInfo.announceForAccessibility(message) is the
+        equivalent — you call it imperatively when you want an announcement.
+        On web: the live region pattern is declarative — the browser watches
+        for text changes and announces them automatically.
+      */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {suggestions.length > 0
+          ? `${suggestions.length} suggestion${suggestions.length !== 1 ? 's' : ''} available`
+          : ''}
+      </div>
+
       {/* Live suggestions dropdown */}
       {/*
           absolute top-full: positions the dropdown directly below the input.
@@ -261,9 +319,19 @@ const PokedexSearch = () => {
 
           In RN: you'd use a Modal or absolute View positioned manually.
           On web: absolute + top-full is the standard dropdown pattern.
+
+          id="search-suggestions": matches aria-controls on the input above.
+          role="listbox": identifies this as a list of selectable options —
+            the semantic pair to the input's role="combobox".
+          aria-label: names the listbox for screen readers.
       */}
       {suggestions.length > 0 && (
-        <div className="border-pokemon-lightgray absolute top-full right-0 left-0 z-50 mt-2 overflow-hidden rounded-2xl border bg-white shadow-lg">
+        <div
+          id="search-suggestions"
+          role="listbox"
+          aria-label="Pokémon suggestions"
+          className="border-pokemon-lightgray absolute top-full right-0 left-0 z-50 mt-2 rounded-2xl border bg-white shadow-lg"
+        >
           {isSearching && (
             <div className="text-pokemon-gray flex items-center gap-2 px-4 py-3 text-sm">
               {/*
@@ -277,9 +345,17 @@ const PokedexSearch = () => {
             </div>
           )}
           {suggestions.map((s) => (
+            /*
+              role="option": each item in a listbox must have this role.
+              Listbox → option is the same parent/child relationship as
+              select → option in HTML. Screen readers use this to announce
+              "option X of Y" as the user navigates the list.
+            */
             <button
               key={s.id}
               type="button"
+              role="option"
+              aria-selected={false}
               onClick={() => {
                 /*
                   On suggestion click: go directly to the Pokémon detail page.
